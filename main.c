@@ -72,7 +72,7 @@ void basic_test_all_instructions_program() {
 
     while (1) {
         int status = executeInstruction(mima);
-        printf("akku: %0x, iar:%0x\n", mima->Akku, mima->IAR);
+        // printf("akku: %0x, iar:%0x\n", mima->Akku, mima->IAR);
         if (status == 1) {
             printf("HALT. MIMA stopped. Ran for %" PRIu64 " instructions.\n", mima->simulated_instructions);
             break;
