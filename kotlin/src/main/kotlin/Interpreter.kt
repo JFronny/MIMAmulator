@@ -28,8 +28,7 @@ fun interpret(file: Path, start: U24) {
             0x9 -> if (akku < U24(0)) iar = arg(ir)
             0xF -> when (ir.value and 0xF0000 shr 16) {
                 0x0 -> {
-                    println("HALT")
-                    println("Last state was:")
+                    println("HALT\nLast state was:")
                     disassemble(dyBuf)
                     return
                 }
