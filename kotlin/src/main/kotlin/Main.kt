@@ -5,7 +5,7 @@ import kotlin.io.path.Path
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
         println("Usage: Assembler <file>")
-        println("       Assembler assemble <source> <target>")
+        println("       Assembler assemble <source> [target]")
         println("       Assembler disassemble <file>")
         println("       Assembler interpret <file> [start]")
         return
@@ -16,11 +16,12 @@ fun main(args: Array<String>) {
     }
     when (args[0]) {
         "assemble" -> {
-            if (args.size != 3) {
-                println("Usage: Assembler assemble <source> <target>")
+            if (args.size !in 2..3) {
+                println("Usage: Assembler assemble <source> [target]")
+                println("       target: target file (default: source with .mbf extension)")
                 return
             }
-            assemble(Path(args[1]), Path(args[2]))
+            assemble(Path(args[1]), Path(args.getOrNull(2) ?: (args[1] + ".mbf")))
         }
         "disassemble" -> {
             if (args.size != 2) {
@@ -30,7 +31,7 @@ fun main(args: Array<String>) {
             disassemble(Path(args[1]))
         }
         "interpret" -> {
-            if (args.size != 2) {
+            if (args.size !in 2..3) {
                 println("Usage: Assembler interpret <file> [start]")
                 println("       start: start address in hex (default: 0)")
                 return
