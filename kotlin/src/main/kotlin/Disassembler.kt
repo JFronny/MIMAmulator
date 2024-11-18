@@ -1,5 +1,6 @@
 package de.frohnmeyer_wds
 
+import java.io.Writer
 import java.nio.file.Path
 import kotlin.io.path.readBytes
 
@@ -8,10 +9,10 @@ fun disassemble(path: Path) {
 
     dyBuf += path.readBytes()
 
-    disassemble(dyBuf)
+    disassemble(dyBuf, System.out.writer())
 }
 
-fun disassemble(dyBuf: DyBuf) {
+fun disassemble(dyBuf: DyBuf, writer: Writer) {
     val labeled = mutableSetOf<U24>()
     dyBuf.forEachIndexed { pos, it ->
         if ((it.value and 0xF00000 shr 20) in (0x1..0x9)) {
@@ -24,23 +25,23 @@ fun disassemble(dyBuf: DyBuf) {
     dyBuf.forEachIndexed { pos, it ->
         if (it.value == 0) {
             if (writing) {
-                println()
+                writer.appendLine()
             }
             writing = false
             return@forEachIndexed
         }
         if (!writing) {
             writing = true
-            println("* = " + pos.toU24())
+            writer.appendLine("* = " + pos.toU24())
         }
         if (pos.toU24() in labeled) {
-            println(dataStore(pos.toU24(), it, constants))
+            writer.appendLine(dataStore(pos.toU24(), it, constants))
         } else {
-            println(disassemble(pos.toU24(), it, constants))
+            writer.appendLine(disassemble(pos.toU24(), it, constants))
         }
     }
     constants.forEach { (pos, name) ->
-        println("$name = ${pos.value}")
+        writer.appendLine("$name = ${pos.value}")
     }
 }
 

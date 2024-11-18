@@ -29,20 +29,20 @@ fun interpret(file: Path, start: U24) {
             0xF -> when (ir.value and 0xF0000 shr 16) {
                 0x0 -> {
                     println("HALT\nLast state was:")
-                    disassemble(dyBuf)
+                    disassemble(dyBuf, System.out.writer())
                     return
                 }
                 0x1 -> akku = akku.inv()
                 0x2 -> akku = akku shr 1
                 else -> {
                     println("Error: Unknown command: $ir\nLast state was:")
-                    disassemble(dyBuf)
+                    disassemble(dyBuf, System.out.writer())
                     return
                 }
             }
             else -> {
                 println("Error: Unknown command: $ir\nLast state was:")
-                disassemble(dyBuf)
+                disassemble(dyBuf, System.out.writer())
                 return
             }
         }
