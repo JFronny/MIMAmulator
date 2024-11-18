@@ -1,6 +1,6 @@
 # MIMAmulator
 
-Emulator for the [KITs](https://kit.edu) MIMA (Minimalmaschine, a 'minimal processor').
+Suite of tools and emulators for the [KITs](https://kit.edu) MIMA (Minimalmaschine, a 'minimal processor').
 
 ## General
 - 24 Bits in a word
@@ -58,3 +58,11 @@ The MIMA uses either 4 bits or 8 bits for the OpCode. If the Instruction begins 
 | 0xFD   | -           | -                                |
 | 0xFE   | -           | -                                |
 | 0xFF   | -           | -                                |
+
+## The Kotlin implementation
+Initially supplied by JFronny, this implementation provides an assembler, a disassembler and an interpreter for the MIMA.
+
+Use `gradle build` to build a jar and `java -jar build/libs/mima-kotlin.jar` to view a help message.
+
+## The C implementation
+TODO
