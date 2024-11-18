@@ -1,0 +1,34 @@
+* = 0
+p1 DS 0xB0F0
+p2 DS 0xE
+p3 DS 0xFFFFEF
+p4 DS 0x1
+p5 DS 0xE00
+p6 DS 0
+p7 DS 0
+
+* = 0x0A
+start: LDV p1
+ADD p2
+AND p3
+OR p4
+XOR p5
+STV p7
+RAR
+RAR
+RAR
+RAR
+STV 0x7
+LDC 0
+NOT
+STV 0x8
+LDC 0x50
+NOT
+ADD p4
+JMN john
+LDC 0xDAD
+JMP john
+
+* = 0x30
+john: STV 0x9
+HALT

@@ -1,0 +1,18 @@
+* = 0x0
+abc = 0x1337
+const0 DS 0xB0F0
+const1 DS 0xE
+const2 DS 0xFFFFEF
+const3 DS 0x1
+const4 DS 0xE00
+
+* = 0x10
+start: main: test: LDV const0 ; testing multiple flags
+    ADD const1
+    AND const2 ; This is a comment
+    OR  const3
+    XOR const4
+    STV 0x6
+
+END:
+    HALT
