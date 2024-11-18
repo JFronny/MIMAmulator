@@ -1,11 +1,16 @@
 package de.frohnmeyer_wds
 
 fun interpret(memory: DyBuf, start: U24) {
-    var iar = start
-    var ir: U24
-    var akku = U24(0)
+    val mima = Mima(memory, start)
+    while (mima.executeSingle()) { }
+}
 
-    while (true) {
+class Mima(val memory: DyBuf, start: U24) {
+    private var iar = start
+    private var ir: U24 = U24(0)
+    private var akku = U24(0)
+
+    fun executeSingle(): Boolean {
         ir = memory[iar]
         iar += 1
         when (ir.value and 0xF00000 shr 20) {
@@ -23,22 +28,23 @@ fun interpret(memory: DyBuf, start: U24) {
                 0x0 -> {
                     println("HALT\nLast state was:")
                     disassemble(memory, System.out.writer())
-                    return
+                    return false
                 }
                 0x1 -> akku = akku.inv()
                 0x2 -> akku = akku shr 1
                 else -> {
                     println("Error: Unknown command: $ir\nLast state was:")
                     disassemble(memory, System.out.writer())
-                    return
+                    return false
                 }
             }
             else -> {
                 println("Error: Unknown command: $ir\nLast state was:")
                 disassemble(memory, System.out.writer())
-                return
+                return false
             }
         }
+        return true
     }
 }
 

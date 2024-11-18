@@ -11,6 +11,7 @@ fun main(args: Array<String>) {
         println("       Assembler assemble <source> [target]")
         println("       Assembler disassemble <file>")
         println("       Assembler interpret <file> [start]")
+        println("       Assembler performance <file> [iterations]")
         return
     }
     if (args.size == 1) {
@@ -25,7 +26,7 @@ fun main(args: Array<String>) {
                 return
             }
             if (args.size == 2) {
-                main(arrayOf(args[0], args[1], args[1] + ".mbf"))
+                main(arrayOf(args[0], args[1], args[1].removeSuffix(".masm") + ".mbf"))
                 return
             }
             Path(args[2]).writeBytes(Path(args[1]).reader().use { assemble(it) }.toByteArray())
@@ -52,6 +53,27 @@ fun main(args: Array<String>) {
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
             interpret(dyBuf, U24.parse(args[2]))
+        }
+        "performance" -> {
+            if (args.size !in 2..3) {
+                println("Usage: Assembler performance <file> [iterations]")
+                println("       iterations: maximum number of instructions to execute (default: 50000)")
+                return
+            }
+            val iterationCount = args.getOrNull(2)?.toIntOrNull() ?: 50000
+            val dyBuf = DyBuf()
+            dyBuf += Path(args[1]).readBytes()
+            val mima = Mima(dyBuf, U24(0))
+            val start = System.nanoTime()
+            for (i in 0 ..< iterationCount) {
+                if (!mima.executeSingle()) {
+                    println("Execution stopped prematurely after $i instructions, cancelling performance test")
+                    return
+                }
+            }
+            val end = System.nanoTime()
+            disassemble(dyBuf, System.out.writer())
+            println("Took ${(end - start) / 1000000}ms for $iterationCount instructions at ${iterationCount.toDouble() / (end - start) * 1000} MHz")
         }
         else -> println("Unknown command: ${args[0]}")
     }

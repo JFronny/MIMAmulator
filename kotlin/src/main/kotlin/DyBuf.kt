@@ -7,7 +7,8 @@ class DyBuf {
     private val maxSize = 0x100000
 
     private var buffer = U24Array(0)
-    private var size = 0
+    var size = 0
+        private set
 
     private fun grow(newSize: Int) {
         if (newSize <= size) {
