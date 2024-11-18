@@ -50,6 +50,12 @@ fun assemble(source: Path, target: Path) {
                 return readWord()
             }
             while (i != -1 && !i.toChar().isWhitespace()) {
+                if (i.toChar() == ';') {
+                    while (i != -1 && i.toChar() != '\n') {
+                        i = it.read()
+                    }
+                    break
+                }
                 append(i.toChar())
                 i = it.read()
             }
