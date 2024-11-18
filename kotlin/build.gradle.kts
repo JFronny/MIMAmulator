@@ -4,7 +4,6 @@ plugins {
 }
 
 group = "de.frohnmeyer-wds"
-version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()

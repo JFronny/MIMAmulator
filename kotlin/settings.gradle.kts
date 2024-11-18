@@ -1,2 +1,2 @@
-rootProject.name = "memea-x"
+rootProject.name = "mima-kotlin"
 
