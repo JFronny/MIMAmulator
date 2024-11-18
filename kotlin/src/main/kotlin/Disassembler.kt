@@ -1,16 +1,6 @@
 package de.frohnmeyer_wds
 
 import java.io.Writer
-import java.nio.file.Path
-import kotlin.io.path.readBytes
-
-fun disassemble(path: Path) {
-    val dyBuf = DyBuf()
-
-    dyBuf += path.readBytes()
-
-    disassemble(dyBuf, System.out.writer())
-}
 
 fun disassemble(dyBuf: DyBuf, writer: Writer) {
     val labeled = mutableSetOf<U24>()

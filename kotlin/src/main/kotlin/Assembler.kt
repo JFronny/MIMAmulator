@@ -1,13 +1,6 @@
 package de.frohnmeyer_wds
 
 import java.io.Reader
-import java.nio.file.Path
-import kotlin.io.path.reader
-import kotlin.io.path.writeBytes
-
-fun assemble(source: Path, target: Path) {
-    target.writeBytes(source.reader().use { assemble(it) }.toByteArray())
-}
 
 fun assemble(reader: Reader): DyBuf {
     val dyBuf = DyBuf()
