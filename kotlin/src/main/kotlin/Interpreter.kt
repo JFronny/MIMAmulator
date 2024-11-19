@@ -9,6 +9,7 @@ class Mima(val memory: DyBuf, start: U24) {
     private var iar = start
     private var ir: U24 = U24(0)
     private var akku = U24(0)
+    private var io = IO()
 
     fun executeSingle(): Boolean {
         ir = memory[iar]
@@ -32,6 +33,8 @@ class Mima(val memory: DyBuf, start: U24) {
                 }
                 0x1 -> akku = akku.inv()
                 0x2 -> akku = akku shr 1
+                0x3 -> akku = io.read(barg(ir))
+                0x4 -> io.write(barg(ir), akku)
                 else -> {
                     println("Error: Unknown command: $ir\nLast state was:")
                     disassemble(memory, System.out.writer())
@@ -50,4 +53,8 @@ class Mima(val memory: DyBuf, start: U24) {
 
 private fun arg(command: U24): U24 {
     return (command.value and 0xFFFFF).toU24()
+}
+
+private fun barg(command: U24): U24 {
+    return (command.value and 0xFFFF).toU24()
 }

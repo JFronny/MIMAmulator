@@ -13,17 +13,24 @@ fun assemble(reader: Reader): DyBuf {
         dyBuf[pos] = (opcode.toU24() shl 16)
     }
 
+    fun bacmd(opcode: UByte): (U24?, U24) -> Unit = { a, pos ->
+        dyBuf[pos] = (opcode.toU24() shl 16) or (a ?: error("Missing argument"))
+    }
+
     val codes = mapOf(
-        "LDC"  to vcmd(   0.toUByte()),
-        "LDV"  to vcmd(   1.toUByte()),
-        "STV"  to vcmd(   2.toUByte()),
-        "ADD"  to vcmd(   3.toUByte()),
-        "AND"  to vcmd(   4.toUByte()),
-        "OR"   to vcmd(   5.toUByte()),
-        "XOR"  to vcmd(   6.toUByte()),
-        "EQL"  to vcmd(   7.toUByte()),
-        "JMP"  to vcmd(   8.toUByte()),
-        "JMN"  to vcmd(   9.toUByte()),
+        "LDC" to vcmd(0x0.toUByte()),
+        "LDV" to vcmd(0x1.toUByte()),
+        "STV" to vcmd(0x2.toUByte()),
+        "ADD" to vcmd(0x3.toUByte()),
+        "AND" to vcmd(0x4.toUByte()),
+        "OR"  to vcmd(0x5.toUByte()),
+        "XOR" to vcmd(0x6.toUByte()),
+        "EQL" to vcmd(0x7.toUByte()),
+        "JMP" to vcmd(0x8.toUByte()),
+        "JMN" to vcmd(0x9.toUByte()),
+
+        "IN"  to bacmd(0xF3.toUByte()),
+        "OUT" to bacmd(0xF4.toUByte()),
     )
     val codes2 = mapOf(
         "HALT" to bcmd(0xF0.toUByte()),

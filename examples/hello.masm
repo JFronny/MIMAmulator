@@ -1,0 +1,33 @@
+JMP _start
+size DS 13
+p1 DS 0x48
+p2 DS 0x65
+p3 DS 0x6C
+p4 DS 0x6C
+p5 DS 0x6F
+p6 DS 0x20
+p7 DS 0x57
+p8 DS 0x6F
+p9 DS 0x72
+pA DS 0x6C
+pB DS 0x64
+pC DS 0x21
+pD DS 0x0A
+M1 DS -1
+
+console = 1
+
+_start:
+    LDV size
+    ADD M1
+    JMN _end
+    STV size
+    LDC 1
+    ADD lv
+    STV lv
+lv: LDV size
+    OUT console
+    JMP _start
+
+_end:
+    HALT
