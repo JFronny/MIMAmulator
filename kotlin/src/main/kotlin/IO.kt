@@ -1,8 +1,8 @@
 package de.frohnmeyer_wds
 
-import java.io.Reader
+import java.io.InputStream
 
-class IO(private val input: Reader? = System.console()?.reader()) {
+class IO(private val input: InputStream? = System.`in`) {
     private var introspectionResult: U24 = U24(1)
 
     fun read(port: U24): U24 = when (port) {
@@ -11,8 +11,8 @@ class IO(private val input: Reader? = System.console()?.reader()) {
             introspectionResult = U24(0)
             result
         }
-        U24(1) -> input?.ready()?.let {
-            if (it) U24(input.read())
+        U24(1) -> input?.available()?.let {
+            if (it > 0) U24(input.read())
             else null
         } ?: U24(0)
         else -> U24(0)
