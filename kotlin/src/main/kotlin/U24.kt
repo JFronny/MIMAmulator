@@ -67,6 +67,10 @@ class U24 constructor(value: Int) {
         return U24(value + i.value)
     }
 
+    operator fun minus(i: Int): String {
+        return U24(value - i).toString()
+    }
+
     companion object {
         fun parse(value: String): U24 {
             return if (value.startsWith("0x")) {

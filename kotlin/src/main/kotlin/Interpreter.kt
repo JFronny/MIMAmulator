@@ -22,12 +22,12 @@ class Mima(val memory: DyBuf, start: U24) {
             0x4 -> akku = akku and memory[arg(ir)]
             0x5 -> akku = akku or memory[arg(ir)]
             0x6 -> akku = akku xor memory[arg(ir)]
-            0x7 -> akku = if (akku == memory[arg(ir)]) U24(1) else U24(0)
+            0x7 -> akku = if (akku == memory[arg(ir)]) U24(-1) else U24(0)
             0x8 -> iar = arg(ir)
             0x9 -> if (akku < U24(0)) iar = arg(ir)
             0xF -> when (ir.value and 0xF0000 shr 16) {
                 0x0 -> {
-                    println("HALT\nLast state was:")
+                    println("HALT at ${iar - 1}\nLast state was:")
                     disassemble(memory, System.out.writer())
                     return false
                 }
@@ -36,13 +36,13 @@ class Mima(val memory: DyBuf, start: U24) {
                 0x3 -> akku = io.read(barg(ir))
                 0x4 -> io.write(barg(ir), akku)
                 else -> {
-                    println("Error: Unknown command: $ir\nLast state was:")
+                    println("Error: Unknown command: $ir (address ${iar - 1})\nLast state was:")
                     disassemble(memory, System.out.writer())
                     return false
                 }
             }
             else -> {
-                println("Error: Unknown command: $ir\nLast state was:")
+                println("Error: Unknown command: $ir (address ${iar - 1})\nLast state was:")
                 disassemble(memory, System.out.writer())
                 return false
             }
