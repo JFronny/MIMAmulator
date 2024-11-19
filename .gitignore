@@ -1,9 +1,12 @@
-cmake-build-debug/
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+
+### CLion ###
+c/cmake-build-debug/
+c/cmake-build-release/
 
 ### IntelliJ IDEA ###
 .idea/
