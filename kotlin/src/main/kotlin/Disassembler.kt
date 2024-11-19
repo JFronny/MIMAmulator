@@ -48,9 +48,11 @@ private fun disassemble(position: U24, command: U24, constants: MutableMap<U24, 
         0x8 -> "JMP ${label(arg(command))}"
         0x9 -> "JMN ${label(arg(command))}"
         0xF -> when (command.value and 0xF0000 shr 16) {
-            0x0 -> "HALT ; ${arg(command)}"
-            0x1 -> "NOT ; ${arg(command)}"
-            0x2 -> "RAR ; ${arg(command)}"
+            0x0 -> "HALT ; ${arg2(command)}"
+            0x1 -> "NOT ; ${arg2(command)}"
+            0x2 -> "RAR ; ${arg2(command)}"
+            0x3 -> "IN ${arg2(command)}"
+            0x4 -> "OUT ${arg2(command)}"
             else -> dataStore(position, command, constants)
         }
         else -> dataStore(position, command, constants)
@@ -63,6 +65,10 @@ private fun dataStore(position: U24, value: U24, constants: MutableMap<U24, Stri
 
 private fun arg(command: U24): U24 {
     return (command.value and 0xFFFFF).toU24()
+}
+
+private fun arg2(command: U24): U24 {
+    return (command.value and 0xFFFF).toU24()
 }
 
 private fun label(pos: U24): String {
