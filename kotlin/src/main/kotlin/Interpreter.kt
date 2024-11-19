@@ -32,7 +32,7 @@ class Mima(val memory: DyBuf, start: U24) {
                     return false
                 }
                 0x1 -> akku = akku.inv()
-                0x2 -> akku = akku shr 1
+                0x2 -> akku = (akku shr 1) or (akku shl 23)
                 0x3 -> akku = io.read(barg(ir))
                 0x4 -> io.write(barg(ir), akku)
                 else -> {
