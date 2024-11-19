@@ -1,33 +1,100 @@
 JMP _start
-size DS 13
+helloSize DS 6
 p1 DS 0x48
 p2 DS 0x65
 p3 DS 0x6C
 p4 DS 0x6C
 p5 DS 0x6F
 p6 DS 0x20
-p7 DS 0x57
-p8 DS 0x6F
-p9 DS 0x72
-pA DS 0x6C
-pB DS 0x64
-pC DS 0x21
-pD DS 0x0A
 M1 DS -1
+
+promptSize DS 25
+p7 DS 0x50
+p8 DS 0x6c
+p9 DS 0x65
+p0 DS 0x61
+pa DS 0x73
+pb DS 0x65
+pc DS 0x20
+pd DS 0x65
+pe DS 0x6e
+pf DS 0x74
+pg DS 0x65
+ph DS 0x72
+pi DS 0x20
+pj DS 0x79
+pk DS 0x6f
+pl DS 0x75
+pm DS 0x72
+pn DS 0x20
+po DS 0x6e
+pp DS 0x61
+pq DS 0x6d
+pr DS 0x65
+newline DS 0xa
+pt DS 0x3e
+pu DS 0x20
 
 console = 1
 
 _start:
-    LDV size
+    LDV promptSize
     ADD M1
-    JMN _end
-    STV size
+    JMN _read
+    STV promptSize
     LDC 1
     ADD lv
     STV lv
-lv: LDV size
+lv: LDV promptSize
     OUT console
     JMP _start
+_read:
+    LDC 1
+    ADD sv
+    STV sv
+tr: IN console
+    STV buffer
+    EQL nil
+    JMN tr
+    LDV buffer
+    EQL newline
+    JMN _hello
+    LDV buffer
+sv: STV inputSize
+    LDC 1
+    ADD inputSize
+    STV inputSize
+    JMP _read
+_hello:
+    LDV helloSize
+    ADD M1
+    JMN _answer
+    STV helloSize
+    LDC 1
+    ADD lq
+    STV lq
+lq: LDV helloSize
+    OUT console
+    JMP _hello
+_answer:
+    LDV inputSize
+    ADD M1
+    JMN _end
+    STV inputSize
+    LDC 1
+    ADD ls
+    STV ls
+ls: LDV inputSize
+    OUT console
+    JMP _answer
 
 _end:
+    LDC 0x21
+    OUT console
+    LDC 0xA
+    OUT console
     HALT
+
+nil DS 0
+buffer DS 0
+inputSize DS 0
