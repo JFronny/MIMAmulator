@@ -33,29 +33,31 @@ fun assemble(reader: Reader): DyBuf {
 
     val constants = mutableMapOf<String, U24>()
     val orConstants = mutableMapOf<String, MutableSet<U24>>()
+    var line = 1
 
     fun readWord(): String? = buildString {
         var i = reader.read()
-        while (i != -1 && i.toChar().isWhitespace()) {
-            i = reader.read()
-        }
-        if (i == -1) return null
-        if (i.toChar() == ';') {
+
+        fun skipComment(): Boolean = if (i.toChar() != ';') false else run {
             while (i != -1 && i.toChar() != '\n') {
                 i = reader.read()
             }
-            return readWord()
+            if (i.toChar() == '\n') line++
+            true
         }
+
+        while (i != -1 && i.toChar().isWhitespace()) {
+            if (i.toChar() == '\n') line++
+            i = reader.read()
+        }
+        if (i == -1) return null
+        if (skipComment()) return readWord()
         while (i != -1 && !i.toChar().isWhitespace()) {
-            if (i.toChar() == ';') {
-                while (i != -1 && i.toChar() != '\n') {
-                    i = reader.read()
-                }
-                break
-            }
+            if (skipComment()) break
             append(i.toChar())
             i = reader.read()
         }
+        if (i.toChar() == '\n') line++
     }
 
     fun readU24(pos: U24?, word: String = readWord() ?: error("Unexpected end of file")): U24 {
@@ -97,14 +99,14 @@ fun assemble(reader: Reader): DyBuf {
                 pos++
             }
             "=" -> {
-                if (labels.isNotEmpty()) error("Unexpected '='")
+                if (labels.isNotEmpty()) error("Unexpected '=' in line $line")
                 if (word == "*") {
                     pos = readU24(null)
                 } else {
                     constants[word] = readU24(null)
                 }
             }
-            else -> error("Unknown opcode: $word")
+            else -> error("Unknown opcode: $word in line $line")
         }
     }
 

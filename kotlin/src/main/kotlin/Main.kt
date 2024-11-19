@@ -60,7 +60,11 @@ fun main(args: Array<String>) {
                 println("       iterations: maximum number of instructions to execute (default: 50000)")
                 return
             }
-            val iterationCount = args.getOrNull(2)?.toIntOrNull() ?: 50000
+            if (args.size == 2) {
+                main(arrayOf(args[0], args[1], "50000"))
+                return
+            }
+            val iterationCount = args[2].toInt()
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
             val mima = Mima(dyBuf, U24(0))
