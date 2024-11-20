@@ -21,9 +21,15 @@ jobs:
           cd kotlin
           gradle nativeCompile
           mv build/native/nativeCompile/mima-kotlin ../mima-kotlin
+          cd ../c
+          cmake -DCMAKE_BUILD_TYPE=Release
+          make
+          mv Mimamulator ../mima-c
           cd ..
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: kotlin
-          path: mima-kotlin
+          path: |
+            mima-kotlin
+            mima-c
