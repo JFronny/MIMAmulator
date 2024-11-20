@@ -30,4 +30,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kotlin
-          path: mima-kotlin
+          path: |
+            mima-kotlin
+            mima-c
