@@ -1,8 +1,7 @@
 # Architecure Overview
-- 24 Bits in a word
-- 20 Address bits
-    - 2^20 = 1048576 words of memory
-- Exactly one register: Akku
+- The MIMA is a 24 bit word machine
+- The memory is addressed using 20 bits, so 1MiB of primary memory
+- There is only one Register: Akku
 
 # Instruction Format
 The MIMA uses either 4 bits or 8 bits for the OpCode. If the Instruction begins with 0xF the MIMA will interpret the first 8 bits as OpCpde.
@@ -17,6 +16,7 @@ The MIMA uses either 4 bits or 8 bits for the OpCode. If the Instruction begins 
 
 # Instructions
 To view the documentation for an extension, find the documentation for the extension in [this](./extensions) directory.
+The underscore in 0x0_ signifies that the second leftmost byte is used as part of the address.
 
 | OpCode | Instruction | Action                           | Extension |
 |--------|-------------|----------------------------------|-----------|
