@@ -3,6 +3,10 @@ project(c C)
 
 set(CMAKE_C_STANDARD 11)
 
+if (CMAKE_BUILD_TYPE MATCHES Release)
+    SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -O3")
+endif()
+
 add_executable(
         Mimamulator main.c
         mimamulator.c
@@ -13,7 +17,7 @@ add_executable(
 )
 
 add_executable(
-        assembler assembler.c
+        Assembler assembler.c
         list.c
         list.h
         hash.c
