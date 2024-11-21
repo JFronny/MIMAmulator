@@ -5,19 +5,27 @@ import java.io.Reader
 fun assemble(reader: Reader): DyBuf {
     val dyBuf = DyBuf()
 
-    fun vcmd(opcode: UByte): (U24?, U24) -> Unit = { a, pos ->
+    fun vcmd(opcode: UByte): (U24?, U24) -> U24 = { a, pos ->
         dyBuf[pos] = (opcode.toU24() shl 20) or (a ?: error("Missing argument"))
+        pos + 1
     }
 
-    fun bcmd(opcode: UByte): (U24) -> Unit = { pos ->
+    fun bcmd(opcode: UByte): (U24) -> U24 = { pos ->
         dyBuf[pos] = (opcode.toU24() shl 16)
+        pos + 1
     }
 
-    fun bacmd(opcode: UByte): (U24?, U24) -> Unit = { a, pos ->
+    fun bacmd(opcode: UByte): (U24?, U24) -> U24 = { a, pos ->
         dyBuf[pos] = (opcode.toU24() shl 16) or (a ?: error("Missing argument"))
+        pos + 1
     }
 
-    val codes = mapOf(
+    val codes0 = mapOf(
+        "HALT" to bcmd(0xF0.toUByte()),
+        "NOT"  to bcmd(0xF1.toUByte()),
+        "RAR"  to bcmd(0xF2.toUByte()),
+    )
+    val codes1 = mapOf(
         "LDC" to vcmd(0x0.toUByte()),
         "LDV" to vcmd(0x1.toUByte()),
         "STV" to vcmd(0x2.toUByte()),
@@ -31,11 +39,6 @@ fun assemble(reader: Reader): DyBuf {
 
         "IN"  to bacmd(0xF3.toUByte()),
         "OUT" to bacmd(0xF4.toUByte()),
-    )
-    val codes2 = mapOf(
-        "HALT" to bcmd(0xF0.toUByte()),
-        "NOT"  to bcmd(0xF1.toUByte()),
-        "RAR"  to bcmd(0xF2.toUByte()),
     )
 
     val constants = mutableMapOf<String, U24>()
@@ -82,19 +85,15 @@ fun assemble(reader: Reader): DyBuf {
             labels.add(word.dropLast(1))
             word = readWord() ?: error("Unexpected end of file")
         }
-        if (word in codes) {
-            val code = codes[word]!!
-            val next = readWord()
-            code(next?.let { readU24(pos, it) }, pos)
+        if (word in codes0) {
             labels.forEach { constants[it] = pos }
-            pos++
+            pos = codes0[word]!!(pos)
             continue
         }
-        if (word in codes2) {
-            val code = codes2[word]!!
-            code(pos)
+        if (word in codes1) {
+            val next = readWord()
             labels.forEach { constants[it] = pos }
-            pos++
+            pos = codes1[word]!!(next?.let { readU24(pos, it) }, pos)
             continue
         }
         val next = readWord()
