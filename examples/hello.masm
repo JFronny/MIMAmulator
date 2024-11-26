@@ -3,7 +3,7 @@ helloSize DS "Hello "
 M1 DS -1
 
 promptSize DS "Please enter your name\n> "
-newline DS 0xa
+newline DS '\n'
 
 console = 1
 

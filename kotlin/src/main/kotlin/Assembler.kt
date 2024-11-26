@@ -70,13 +70,6 @@ fun assemble(reader: Reader): DyBuf {
         if (i.toChar() == '\n') line++
     }
 
-    fun readU24(pos: U24?, word: String = readWord() ?: error("Unexpected end of file")): U24 {
-        return U24.tryParse(word) ?: constants[word] ?: run {
-            orConstants.computeIfAbsent(word) { mutableSetOf() }.add(pos ?: error("Invalid constant: $word"))
-            U24(0)
-        }
-    }
-
     fun readChar(ch: Char, next: () -> Char?): Char? {
         return when (ch) {
             '\\' -> when (next()) {
@@ -90,6 +83,20 @@ fun assemble(reader: Reader): DyBuf {
             '\"' -> null
             '\n' -> error("Unexpected end of line in line $line")
             else -> ch
+        }
+    }
+
+    fun readU24(pos: U24?, word: String = readWord() ?: error("Unexpected end of file")): U24 {
+        if (word.getOrNull(0) == '\'') {
+            if (word.length !in 3..4 || word.last() != '\'') error("Invalid character: $word")
+            var i = 1
+            val ch = readChar(word[i++]) { word.getOrNull(i++) }?.code ?: error("Invalid character: $word")
+            if (i != word.length - 1) error("Invalid character: $word")
+            return U24(ch)
+        }
+        return U24.tryParse(word) ?: constants[word] ?: run {
+            orConstants.computeIfAbsent(word) { mutableSetOf() }.add(pos ?: error("Invalid constant: $word"))
+            U24(0)
         }
     }
 
