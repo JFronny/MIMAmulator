@@ -22,6 +22,9 @@ fun assemble(reader: Reader, start: U24 = U24(0), knownConstants: Map<String, U2
     }
 
     fun pacmd(code: String): (U24?, U24) -> U24 = { a, pos ->
+        // Warning: If a pseudo-instruction uses a different pseudo-instruction in its implementation,
+        //          the parameters MUST be available BEFORE that pseudo-instruction is called.
+        //          Make sure you use no down-jumps or data stores defined later in the code!
         val buf = assemble(StringReader(code), pos, mapOf(
             "a1" to (a ?: error("Missing argument"))
         ))
