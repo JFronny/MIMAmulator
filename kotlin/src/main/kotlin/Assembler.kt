@@ -77,6 +77,42 @@ fun assemble(reader: Reader): DyBuf {
         }
     }
 
+    fun readChar(ch: Char, next: () -> Char?): Char? {
+        return when (ch) {
+            '\\' -> when (next()) {
+                'n' -> '\n'
+                'r' -> '\r'
+                't' -> '\t'
+                '0' -> '\u0000'
+                null -> error("Unexpected escape sequence \"\\ \" in line $line")
+                else -> error("Unknown escape sequence \"\\$ch\" in line $line")
+            }
+            '\"' -> null
+            '\n' -> error("Unexpected end of line in line $line")
+            else -> ch
+        }
+    }
+
+    fun readStringOrU24(pos: U24?): Either<U24, String> {
+        val word = readWord() ?: error("Unexpected end of file")
+        return if (word.getOrNull(0) == '\"') {
+            buildString {
+                var i = 1
+                while (i < word.length) {
+                    append(readChar(word[i++]) { word.getOrNull(i++) } ?: return@buildString)
+                }
+                append(' ')
+                i = reader.read()
+                while (i != -1 && i.toChar() != '\"') {
+                    append(readChar(i.toChar()) { i = reader.read(); if (i == -1) null else i.toChar() } ?: return@buildString)
+                    i = reader.read()
+                }
+            }.eitherRight()
+        } else {
+            readU24(pos, word).eitherLeft()
+        }
+    }
+
     var pos = U24(0)
     while (true) {
         var word = readWord() ?: break
@@ -99,10 +135,20 @@ fun assemble(reader: Reader): DyBuf {
         val next = readWord()
         when (next) {
             "DS" -> {
-                dyBuf[pos] = readU24(pos)
                 constants[word] = pos
                 labels.forEach { constants[it] = pos }
-                pos++
+                readStringOrU24(pos).fold(
+                    { number ->
+                        dyBuf[pos] = number
+                        pos++
+                    },
+                    { string ->
+                        dyBuf[pos++] = U24(string.length)
+                        string.forEach {
+                            dyBuf[pos++] = U24(it.code)
+                        }
+                    }
+                )
             }
             "=" -> {
                 if (labels.isNotEmpty()) error("Unexpected '=' in line $line")
