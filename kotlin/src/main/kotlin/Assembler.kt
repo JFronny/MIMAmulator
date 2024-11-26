@@ -1,8 +1,9 @@
 package de.frohnmeyer_wds
 
 import java.io.Reader
+import java.io.StringReader
 
-fun assemble(reader: Reader): DyBuf {
+fun assemble(reader: Reader, start: U24 = U24(0), knownConstants: Map<String, U24> = mapOf()): DyBuf {
     val dyBuf = DyBuf()
 
     fun vcmd(opcode: UByte): (U24?, U24) -> U24 = { a, pos ->
@@ -18,6 +19,14 @@ fun assemble(reader: Reader): DyBuf {
     fun bacmd(opcode: UByte): (U24?, U24) -> U24 = { a, pos ->
         dyBuf[pos] = (opcode.toU24() shl 16) or (a ?: error("Missing argument"))
         pos + 1
+    }
+
+    fun pacmd(code: String): (U24?, U24) -> U24 = { a, pos ->
+        val buf = assemble(StringReader(code), pos, mapOf(
+            "a1" to (a ?: error("Missing argument"))
+        ))
+        dyBuf[pos] = buf.copyOfRange(pos.value, buf.size)
+        pos + (buf.size - pos.value)
     }
 
     val codes0 = mapOf(
@@ -39,9 +48,48 @@ fun assemble(reader: Reader): DyBuf {
 
         "IN"  to bacmd(0xF3.toUByte()),
         "OUT" to bacmd(0xF4.toUByte()),
+
+        "LDI" to pacmd("""
+            LDV il
+            ADD a1
+            STV cm
+            JMP cm
+        il: LDV 0
+        cm: LDV 0
+        """.trimIndent()),
+
+        "OUTS" to pacmd("""
+            JMP prepare
+            
+        arg DS 0
+        end DS 0
+        pos DS 0
+        
+        prepare:
+            STV arg
+            LDC 1
+            ADD arg
+            STV pos
+            LDI arg
+            ADD pos
+            STV end
+        
+        print:
+            LDV pos
+            EQL end
+            JMN _end
+            LDI pos
+            OUT a1
+            LDC 1
+            ADD pos
+            STV pos
+            JMP print
+        _end:
+            LDV arg
+        """.trimIndent()),
     )
 
-    val constants = mutableMapOf<String, U24>()
+    val constants = knownConstants.toMutableMap()
     val orConstants = mutableMapOf<String, MutableSet<U24>>()
     var line = 1
 
@@ -120,7 +168,7 @@ fun assemble(reader: Reader): DyBuf {
         }
     }
 
-    var pos = U24(0)
+    var pos = start
     while (true) {
         var word = readWord() ?: break
         val labels = mutableListOf<String>()

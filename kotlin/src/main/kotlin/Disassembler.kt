@@ -5,7 +5,7 @@ import java.io.Writer
 fun disassemble(dyBuf: DyBuf, writer: Writer) {
     val labeled = mutableSetOf<U24>()
     dyBuf.forEachIndexed { pos, it ->
-        if ((it.value and 0xF00000 shr 20) in (0x1..0x9)) {
+        if ((it.value and 0xF00000 shr 20) in (0x1..0x7)) {
             labeled.add(arg(it))
         }
     }
@@ -33,6 +33,7 @@ fun disassemble(dyBuf: DyBuf, writer: Writer) {
     constants.forEach { (pos, name) ->
         writer.appendLine("$name = ${pos.value}")
     }
+    writer.flush()
 }
 
 private fun disassemble(position: U24, command: U24, constants: MutableMap<U24, String>): String {

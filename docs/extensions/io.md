@@ -18,6 +18,10 @@ The `OUT` instruction writes the value in the Akku register to an IO port.
 It may take an arbitrary amount of time to complete, unless otherwise specified.
 If the port is not connected to anything, the value written is ignored.
 
+## The "OUTS" pseudo-instruction
+The `OUTS` pseudo-instruction writes a series of values to an IO port.
+This behaves like a loop over the provided array of values, writing each value to the port in turn.
+
 ## Special IO ports
 The following IO ports are special and have a predefined behavior:
 - Port 0: The IO introspection port.

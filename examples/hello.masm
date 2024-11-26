@@ -1,23 +1,17 @@
 JMP _start
-helloSize DS "Hello "
-M1 DS -1
-
-promptSize DS "Please enter your name\n> "
+prompt DS "Please enter your name\n> "
 newline DS '\n'
+hello DS "Hello "
 
+M1 DS -1
+nil DS 0
 console = 1
 
+buffer DS 0
+
 _start:
-    LDV promptSize
-    ADD M1
-    JMN _read
-    STV promptSize
-    LDC 1
-    ADD lv
-    STV lv
-lv: LDV promptSize
-    OUT console
-    JMP _start
+    LDC prompt
+    OUTS console
 _read:
     LDC 1
     ADD sv
@@ -36,16 +30,8 @@ sv: STV inputSize
     STV inputSize
     JMP _read
 _hello:
-    LDV helloSize
-    ADD M1
-    JMN _answer
-    STV helloSize
-    LDC 1
-    ADD lq
-    STV lq
-lq: LDV helloSize
-    OUT console
-    JMP _hello
+    LDC hello
+    OUTS console
 _answer:
     LDV inputSize
     ADD M1
@@ -59,12 +45,10 @@ ls: LDV inputSize
     JMP _answer
 
 _end:
-    LDC 0x21
+    LDC '!'
     OUT console
-    LDC 0xA
+    LDC '\n'
     OUT console
     HALT
 
-nil DS 0
-buffer DS 0
 inputSize DS 0

@@ -12,8 +12,7 @@ class Mima(val memory: DyBuf, start: U24) {
     private var io = IO()
 
     fun executeSingle(): Boolean {
-        ir = memory[iar]
-        iar += 1
+        ir = memory[iar++]
         when (ir.value and 0xF00000 shr 20) {
             0x0 -> akku = arg(ir)
             0x1 -> akku = memory[arg(ir)]
@@ -48,6 +47,19 @@ class Mima(val memory: DyBuf, start: U24) {
             }
         }
         return true
+    }
+
+    override fun toString(): String = buildString {
+        memory.forEachIndexed { i, value ->
+            if (i != 0) append(' ')
+            if (i == iar.value) append('<')
+            append(value.toStringFlat())
+            if (i == iar.value) {
+                append('|')
+                append(akku.toStringFlat())
+                append(">")
+            }
+        }
     }
 }
 

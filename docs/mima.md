@@ -52,3 +52,15 @@ The underscore in 0x0_ signifies that the second leftmost byte is used as part o
 | 0xFD   | -           | -                                |           |
 | 0xFE   | -           | -                                |           |
 | 0xFF   | -           | -                                |           |
+
+# Pseudo Instructions
+| Instruction | Action             | Extension |
+|-------------|--------------------|-----------|
+| LDI a       | **a -> Akku        | Indirect  |
+| OUTS a      | See extension docs | IO        |
+
+# Data formats
+## Arrays
+Arrays are stored in memory as a sequence of words.
+The first word contains the length of the array,
+the following words contain the elements of the array.

@@ -1,0 +1,10 @@
+JMP _start
+hello DS "Hello, World!\n"
+console = 1
+
+_start:
+    LDC hello
+    OUTS console
+    OUTS console
+    OUTS console
+    HALT
