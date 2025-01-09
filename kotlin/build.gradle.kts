@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    implementation("de.kherud:llama:3.4.1")
     testImplementation(kotlin("test"))
 }
 

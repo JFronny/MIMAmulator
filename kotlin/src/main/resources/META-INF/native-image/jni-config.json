@@ -1,0 +1,72 @@
+[
+{
+  "name":"de.kherud.llama.LlamaException"
+},
+{
+  "name":"de.kherud.llama.LlamaIterator",
+  "fields":[{"name":"hasNext"}, {"name":"taskId"}]
+},
+{
+  "name":"de.kherud.llama.LlamaModel",
+  "fields":[{"name":"ctx"}]
+},
+{
+  "name":"de.kherud.llama.LlamaOutput",
+  "methods":[{"name":"<init>","parameterTypes":["byte[]","java.util.Map","boolean"] }]
+},
+{
+  "name":"de.kherud.llama.LogLevel",
+  "fields":[{"name":"DEBUG"}, {"name":"ERROR"}, {"name":"INFO"}, {"name":"WARN"}]
+},
+{
+  "name":"de.kherud.llama.args.LogFormat",
+  "fields":[{"name":"JSON"}, {"name":"TEXT"}]
+},
+{
+  "name":"java.lang.Boolean",
+  "methods":[{"name":"getBoolean","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.lang.Float",
+  "methods":[{"name":"<init>","parameterTypes":["float"] }, {"name":"floatValue","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.Integer",
+  "methods":[{"name":"<init>","parameterTypes":["int"] }, {"name":"intValue","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.OutOfMemoryError"
+},
+{
+  "name":"java.lang.String",
+  "methods":[{"name":"getBytes","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.nio.charset.StandardCharsets",
+  "fields":[{"name":"UTF_8"}]
+},
+{
+  "name":"java.util.HashMap",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.util.Iterator",
+  "methods":[{"name":"hasNext","parameterTypes":[] }, {"name":"next","parameterTypes":[] }]
+},
+{
+  "name":"java.util.Map",
+  "methods":[{"name":"entrySet","parameterTypes":[] }, {"name":"put","parameterTypes":["java.lang.Object","java.lang.Object"] }]
+},
+{
+  "name":"java.util.Map$Entry",
+  "methods":[{"name":"getKey","parameterTypes":[] }, {"name":"getValue","parameterTypes":[] }]
+},
+{
+  "name":"java.util.Set",
+  "methods":[{"name":"iterator","parameterTypes":[] }]
+},
+{
+  "name":"java.util.function.BiConsumer",
+  "methods":[{"name":"accept","parameterTypes":["java.lang.Object","java.lang.Object"] }]
+}
+]

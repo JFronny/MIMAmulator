@@ -117,15 +117,18 @@ fun main(args: Array<String>) {
             val iterationCount = args[2].toInt()
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
-            val mima = Mima(dyBuf, listOf(ConsolePort()), U24(0))
-            val start = System.nanoTime()
-            for (i in 0..<iterationCount) {
-                if (!mima.executeSingle()) {
-                    println("Execution stopped prematurely after $i instructions, cancelling performance test")
-                    return
+            val start: Long
+            val end: Long
+            Mima(dyBuf, listOf(ConsolePort()), U24(0)).use { mima ->
+                start = System.nanoTime()
+                for (i in 0..<iterationCount) {
+                    if (!mima.executeSingle()) {
+                        println("Execution stopped prematurely after $i instructions, cancelling performance test")
+                        return
+                    }
                 }
+                end = System.nanoTime()
             }
-            val end = System.nanoTime()
             disassemble(dyBuf, System.out.writer())
             println("Took ${(end - start) / 1000000}ms for $iterationCount instructions at ${iterationCount.toDouble() / (end - start) * 1000} MHz")
         }

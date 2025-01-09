@@ -1,0 +1,74 @@
+JMP _start
+header DS "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful AI assistant that aims to answer questions truthfully but in a humorous way<|eot_id|>\n"
+user DS "<|start_header_id|>user<|end_header_id|>\n\n"
+userEnd DS "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+aiEnd DS "<|eot_id|>\n"
+
+consolePrompt DS "|> "
+newline DS '\n'
+
+nil DS 0
+buffer DS 0
+M1 DS -1
+
+console = 1
+ai = 1337
+
+_osv: STV inputSize
+
+_start:
+    LDC header
+    OUTS ai
+head:
+    LDC consolePrompt
+    OUTS console
+    LDV _osv
+    STV sv
+    LDC 0
+    STV inputSize
+prompt:
+    LDC 1
+    ADD sv
+    STV sv
+tr: IN console
+    STV buffer
+    EQL nil
+    JMN tr
+    LDV buffer
+    EQL newline
+    JMN tr_end
+    LDV buffer
+sv: STV inputSize
+    LDC 1
+    ADD inputSize
+    STV inputSize
+    JMP prompt
+tr_end:
+    LDC user
+    OUTS ai
+    LDV inputSize
+    ADD M1
+    JMN _end
+    LDC inputSize
+    OUTS ai
+    LDC userEnd
+    OUTS ai
+ta: IN ai
+    STV buffer
+    EQL nil
+    JMN postAi
+    LDV buffer
+    OUT console
+    JMP ta
+postAi:
+    LDC aiEnd
+    OUTS ai
+    LDV newline
+    OUT console
+    JMP head
+_end:
+    HALT
+
+
+
+inputSize DS 0

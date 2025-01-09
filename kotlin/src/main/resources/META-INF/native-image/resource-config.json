@@ -1,0 +1,15 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\Qde/kherud/llama/Linux/x86_64/libggml.so\\E"
+  }, {
+    "pattern":"\\Qde/kherud/llama/Linux/x86_64/libjllama.so\\E"
+  }, {
+    "pattern":"\\Qde/kherud/llama/Linux/x86_64/libllama.so\\E"
+  }]},
+  "bundles":[]
+}

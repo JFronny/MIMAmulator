@@ -1,0 +1,9 @@
+[
+{
+  "name":"java.util.concurrent.ForkJoinTask",
+  "fields":[{"name":"aux"}, {"name":"status"}]
+},
+{
+  "name":"jdk.internal.misc.Unsafe"
+}
+]
