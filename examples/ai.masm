@@ -1,5 +1,5 @@
 JMP _start
-header DS "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful AI assistant that aims to answer questions truthfully but in a humorous way<|eot_id|>\n"
+header DS "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful AI assistant that aims to answer questions in a concise manner<|eot_id|>\n"
 user DS "<|start_header_id|>user<|end_header_id|>\n\n"
 userEnd DS "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
 aiEnd DS "<|eot_id|>\n"
@@ -9,10 +9,10 @@ newline DS '\n'
 
 nil DS 0
 buffer DS 0
-M1 DS -1
+M1 DS -2
 
 console = 1
-ai = 1337
+ai = 2
 
 _osv: STV inputSize
 

@@ -1,12 +1,15 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima.io
 
-import de.kherud.llama.*
+import de.frohnmeyerwds.mima.util.U24
+import de.kherud.llama.InferenceParameters
+import de.kherud.llama.LlamaIterator
+import de.kherud.llama.LlamaModel
+import de.kherud.llama.ModelParameters
 import de.kherud.llama.args.LogFormat
 import de.kherud.llama.args.MiroStat
-import java.io.Closeable
 import java.nio.file.Path
 
-class AI(private val source: Path) : Closeable {
+class AIPort(private val source: Path) : Port {
     private var model: LlamaModel? = null
 
     private fun getModel(): LlamaModel {
@@ -27,7 +30,7 @@ class AI(private val source: Path) : Closeable {
     private var outputIterator: CharIterator? = null
     private var needsWrite = false
 
-    fun read(): U24 {
+    override fun read(): U24 {
         if (outputIterator != null) return advanceOutputIterator()
         if (needsWrite) return U24(0)
         val iter = iterator ?: getModel().generate(
@@ -55,13 +58,15 @@ class AI(private val source: Path) : Closeable {
         return U24(ch.code)
     }
 
-    fun write(value: U24) {
+    override fun write(value: U24) {
         needsWrite = false
         iterator?.cancel()
         iterator = null
         outputIterator = null
         prompt.append(value.value.toChar())
     }
+
+    override val kind: U24 get() = U24(1)
 
     override fun close() {
         model?.close()

@@ -1,5 +1,6 @@
 package de.frohnmeyerwds.mima
 
+import de.frohnmeyerwds.mima.io.AIPort
 import de.frohnmeyerwds.mima.io.ConsolePort
 import de.frohnmeyerwds.mima.io.Port
 import de.frohnmeyerwds.mima.io.ReadOnlyPort
@@ -82,6 +83,14 @@ fun main(args: Array<String>) {
                             }
                             ports.add(ReadOnlyPort(RandomAccessFile(value, "r")))
                         }
+                        "ai" -> {
+                            if (value == null) {
+                                println("No model weights specified for AI port")
+                                ports.forEach { it.close() }
+                                return
+                            }
+                            ports.add(AIPort(Path(value)))
+                        }
                         else -> {
                             println("Unknown port: $key")
                             ports.forEach { it.close() }
@@ -97,6 +106,7 @@ fun main(args: Array<String>) {
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
             Mima(dyBuf, ports, start).interpret()
+            ports.forEach { it.close() }
             if (disassemble) {
                 println("Last state was:")
                 disassemble(dyBuf, System.out.writer())
@@ -117,18 +127,16 @@ fun main(args: Array<String>) {
             val iterationCount = args[2].toInt()
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
-            val start: Long
-            val end: Long
-            Mima(dyBuf, listOf(ConsolePort()), U24(0)).use { mima ->
-                start = System.nanoTime()
-                for (i in 0..<iterationCount) {
-                    if (!mima.executeSingle()) {
-                        println("Execution stopped prematurely after $i instructions, cancelling performance test")
-                        return
-                    }
+            val mima = Mima(dyBuf, listOf(ConsolePort()), U24(0))
+            val start: Long = System.nanoTime()
+            for (i in 0..<iterationCount) {
+                if (!mima.executeSingle()) {
+                    println("Execution stopped prematurely after $i instructions, cancelling performance test")
+                    return
                 }
-                end = System.nanoTime()
             }
+            val end: Long = System.nanoTime()
+
             disassemble(dyBuf, System.out.writer())
             println("Took ${(end - start) / 1000000}ms for $iterationCount instructions at ${iterationCount.toDouble() / (end - start) * 1000} MHz")
         }
