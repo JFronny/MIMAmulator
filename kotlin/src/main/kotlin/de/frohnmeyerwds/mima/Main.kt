@@ -2,8 +2,10 @@ package de.frohnmeyerwds.mima
 
 import de.frohnmeyerwds.mima.io.ConsolePort
 import de.frohnmeyerwds.mima.io.Port
+import de.frohnmeyerwds.mima.io.ReadOnlyPort
 import de.frohnmeyerwds.mima.util.DyBuf
 import de.frohnmeyerwds.mima.util.U24
+import java.io.RandomAccessFile
 import kotlin.io.path.*
 
 fun main(args: Array<String>) {
@@ -72,7 +74,14 @@ fun main(args: Array<String>) {
                                 ports.add(ConsolePort(path.inputStream(), path.outputStream()))
                             }
                         }
-
+                        "ro" -> {
+                            if (value == null) {
+                                println("No file specified for read-only port")
+                                ports.forEach { it.close() }
+                                return
+                            }
+                            ports.add(ReadOnlyPort(RandomAccessFile(value, "r")))
+                        }
                         else -> {
                             println("Unknown port: $key")
                             ports.forEach { it.close() }

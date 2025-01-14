@@ -55,3 +55,5 @@ The following introspection requests are defined:
   - 1: The port uses a non-standard device type. Its behavior is specified elsewhere.
   - 2: The port is the introspection port.
   - 3: The port is a console. It behaves like the standard console port described above.
+  - 4: The port is a simple, read-only device that provides a stream of program-specific data.
+       Writing to this port seeks the specified relative nunmber of 24-bit words.
