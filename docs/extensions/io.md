@@ -57,3 +57,5 @@ The following introspection requests are defined:
   - 3: The port is a console. It behaves like the standard console port described above.
   - 4: The port is a simple, read-only device that provides a stream of program-specific data.
        Writing to this port seeks the specified relative nunmber of 24-bit words.
+  - 5: This port is a speaker. This port accepts 24-bit, big-endian, signed PCM audio samples at 16000Hz.
+       Writing to this port plays the sample. Reading from this port is undefined.

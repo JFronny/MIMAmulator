@@ -3,6 +3,7 @@ package de.frohnmeyerwds.mima
 import de.frohnmeyerwds.mima.io.ConsolePort
 import de.frohnmeyerwds.mima.io.Port
 import de.frohnmeyerwds.mima.io.ReadOnlyPort
+import de.frohnmeyerwds.mima.io.SpeakerPort
 import de.frohnmeyerwds.mima.util.DyBuf
 import de.frohnmeyerwds.mima.util.U24
 import java.io.RandomAccessFile
@@ -81,6 +82,14 @@ fun main(args: Array<String>) {
                                 return
                             }
                             ports.add(ReadOnlyPort(RandomAccessFile(value, "r")))
+                        }
+                        "sound" -> {
+                            if (value != null) {
+                                println("Sound port does not take any arguments")
+                                ports.forEach { it.close() }
+                                return
+                            }
+                            ports.add(SpeakerPort())
                         }
                         else -> {
                             println("Unknown port: $key")
