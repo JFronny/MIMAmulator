@@ -1,11 +1,10 @@
 package de.frohnmeyerwds.mima
 
+import de.frohnmeyerwds.mima.io.ConsolePort
+import de.frohnmeyerwds.mima.io.Port
 import de.frohnmeyerwds.mima.util.DyBuf
 import de.frohnmeyerwds.mima.util.U24
-import kotlin.io.path.Path
-import kotlin.io.path.readBytes
-import kotlin.io.path.reader
-import kotlin.io.path.writeBytes
+import kotlin.io.path.*
 
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
@@ -33,6 +32,7 @@ fun main(args: Array<String>) {
             }
             Path(args[2]).writeBytes(Path(args[1]).reader().use { assemble(it) }.toByteArray())
         }
+
         "disassemble" -> {
             if (args.size != 2) {
                 println("Usage: Assembler disassemble <file>")
@@ -42,20 +42,59 @@ fun main(args: Array<String>) {
             dyBuf += Path(args[1]).readBytes()
             disassemble(dyBuf, System.out.writer())
         }
+
         "interpret" -> {
-            if (args.size !in 2..3) {
-                println("Usage: Assembler interpret <file> [start]")
+            fun help() {
+                println("Usage: Assembler interpret <file> [start] [options]")
                 println("       start: start address in hex (default: 0)")
+                println("Options:")
+                println("   -d: disassemble memory after execution")
                 return
             }
-            if (args.size == 2) {
-                main(arrayOf(args[0], args[1], "0"))
-                return
+
+            val start = if (args.size == 2 || args[2].startsWith("-")) U24(0) else U24.parse(args[2])
+            val ports = mutableListOf<Port>()
+            var disassemble = false
+            for (i in 3..<args.size) {
+                if (args[i] == "-d") {
+                    disassemble = true
+                    continue
+                } else if (args[i].startsWith("--port.")) {
+                    val split = args[i].substring("--port.".length).split('=', limit = 2)
+                    val key = split[0]
+                    val value = split.getOrNull(1)
+                    when (key) {
+                        "console" -> {
+                            if (value == null) {
+                                ports.add(ConsolePort())
+                            } else {
+                                val path = Path(value)
+                                ports.add(ConsolePort(path.inputStream(), path.outputStream()))
+                            }
+                        }
+
+                        else -> {
+                            println("Unknown port: $key")
+                            ports.forEach { it.close() }
+                            return
+                        }
+                    }
+                } else {
+                    help()
+                    return
+                }
             }
+            if (ports.isEmpty()) ports.add(ConsolePort())
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
-            interpret(dyBuf, U24.parse(args[2]))
+            Mima(dyBuf, ports, start).interpret()
+            if (disassemble) {
+                println("Last state was:")
+                disassemble(dyBuf, System.out.writer())
+            }
+
         }
+
         "performance" -> {
             if (args.size !in 2..3) {
                 println("Usage: Assembler performance <file> [iterations]")
@@ -69,9 +108,9 @@ fun main(args: Array<String>) {
             val iterationCount = args[2].toInt()
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
-            val mima = Mima(dyBuf, U24(0))
+            val mima = Mima(dyBuf, listOf(ConsolePort()), U24(0))
             val start = System.nanoTime()
-            for (i in 0 ..< iterationCount) {
+            for (i in 0..<iterationCount) {
                 if (!mima.executeSingle()) {
                     println("Execution stopped prematurely after $i instructions, cancelling performance test")
                     return
@@ -81,6 +120,7 @@ fun main(args: Array<String>) {
             disassemble(dyBuf, System.out.writer())
             println("Took ${(end - start) / 1000000}ms for $iterationCount instructions at ${iterationCount.toDouble() / (end - start) * 1000} MHz")
         }
+
         else -> println("Unknown command: ${args[0]}")
     }
 }

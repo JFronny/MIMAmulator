@@ -1,21 +1,16 @@
 package de.frohnmeyerwds.mima
 
-import de.frohnmeyerwds.mima.io.ConsolePort
 import de.frohnmeyerwds.mima.io.IO
+import de.frohnmeyerwds.mima.io.Port
 import de.frohnmeyerwds.mima.util.DyBuf
 import de.frohnmeyerwds.mima.util.U24
 import de.frohnmeyerwds.mima.util.toU24
 
-fun interpret(memory: DyBuf, start: U24) {
-    val mima = Mima(memory, start)
-    while (mima.executeSingle()) { }
-}
-
-class Mima(val memory: DyBuf, start: U24) {
+class Mima(val memory: DyBuf, ports: List<Port>, start: U24) {
     private var iar = start
     private var ir: U24 = U24(0)
     private var akku = U24(0)
-    private var io = IO(listOf(ConsolePort(System.`in`, System.out)))
+    private var io = IO(ports)
 
     fun executeSingle(): Boolean {
         ir = memory[iar++]
@@ -32,8 +27,7 @@ class Mima(val memory: DyBuf, start: U24) {
             0x9 -> if (akku < U24(0)) iar = arg(ir)
             0xF -> when (ir.value and 0xF0000 shr 16) {
                 0x0 -> {
-                    println("HALT at ${iar - 1}\nLast state was:")
-                    disassemble(memory, System.out.writer())
+                    println("HALT at ${iar - 1}")
                     return false
                 }
                 0x1 -> akku = akku.inv()
@@ -41,18 +35,20 @@ class Mima(val memory: DyBuf, start: U24) {
                 0x3 -> akku = io.read(barg(ir))
                 0x4 -> io.write(barg(ir), akku)
                 else -> {
-                    println("Error: Unknown command: $ir (address ${iar - 1})\nLast state was:")
-                    disassemble(memory, System.out.writer())
+                    println("Error: Unknown command: $ir (address ${iar - 1})")
                     return false
                 }
             }
             else -> {
-                println("Error: Unknown command: $ir (address ${iar - 1})\nLast state was:")
-                disassemble(memory, System.out.writer())
+                println("Error: Unknown command: $ir (address ${iar - 1})")
                 return false
             }
         }
         return true
+    }
+
+    fun interpret() {
+        while (executeSingle()) { }
     }
 
     override fun toString(): String = buildString {

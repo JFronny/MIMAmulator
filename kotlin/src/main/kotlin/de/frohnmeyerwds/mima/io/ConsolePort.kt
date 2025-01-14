@@ -6,6 +6,8 @@ import java.io.InputStream
 import java.io.OutputStream
 
 class ConsolePort(private val `in`: InputStream, private val out: OutputStream) : Port {
+    constructor() : this(System.`in`, System.out)
+
     override fun read(): U24 = if (`in`.available() > 0) U24(`in`.read()) else ZERO
 
     override fun write(value: U24) {
@@ -14,4 +16,9 @@ class ConsolePort(private val `in`: InputStream, private val out: OutputStream) 
     }
 
     override val kind: U24 get() = U24(3)
+
+    override fun close() {
+        `in`.close()
+        out.close()
+    }
 }
