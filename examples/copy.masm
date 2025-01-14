@@ -1,5 +1,6 @@
 JMP _start
 consoleText DS "- <> Music Playback <> -\n"
+unrecognized DS "Unrecognized input. This program handles h, l, and x"
 
 ; ffmpeg -i source.mp3 -f s24be -acodec pcm_s24be -ac 1 -ar 16000 source.pcm
 ; mima-kotlin interpret examples/copy.mbf --port.console --port.ro=source.pcm --port.sound
@@ -8,10 +9,50 @@ console = 1
 source = 2
 target = 3
 
+M1 DS -1
+skip =  480000
+lkip = -480000
+
 _start:
     LDC consoleText
     OUTS console
 _datum:
     IN source
     OUT target
+    IN console
+    ADD M1
+    JMN _datum
+    STV dt
+    LDC 1
+    ADD dt
+    STV dt
+    EQL nd
+    JMN end
+    LDV dt
+    EQL right
+    JMN skipRight
+    LDV dt
+    EQL left
+    JMN skipLeft
+    LDC unrecognized
+    OUTS console
     JMP _datum
+skipRight:
+    OUTS console
+    JMP _datum
+    LDC skip
+    OUT source
+    JMP _datum
+skipLeft:
+    OUTS console
+    JMP _datum
+    LDC lkip
+    OUT source
+    JMP _datum
+end:
+    HALT
+
+dt DS 0
+nd DS 'x'
+right DS 'l'
+left DS 'h'

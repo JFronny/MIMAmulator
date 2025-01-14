@@ -23,6 +23,10 @@ application {
     mainClass = "de.frohnmeyerwds.mima.MainKt"
 }
 
+tasks.run.configure {
+    standardInput = System.`in`
+}
+
 graalvmNative {
     binaries {
         named("main") {
@@ -33,8 +37,5 @@ graalvmNative {
             }
             sharedLibrary = false
         }
-    }
-    agent {
-        defaultMode = "standard"
     }
 }
