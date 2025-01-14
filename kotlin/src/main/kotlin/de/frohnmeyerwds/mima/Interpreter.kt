@@ -1,4 +1,10 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima
+
+import de.frohnmeyerwds.mima.io.ConsolePort
+import de.frohnmeyerwds.mima.io.IO
+import de.frohnmeyerwds.mima.util.DyBuf
+import de.frohnmeyerwds.mima.util.U24
+import de.frohnmeyerwds.mima.util.toU24
 
 fun interpret(memory: DyBuf, start: U24) {
     val mima = Mima(memory, start)
@@ -9,7 +15,7 @@ class Mima(val memory: DyBuf, start: U24) {
     private var iar = start
     private var ir: U24 = U24(0)
     private var akku = U24(0)
-    private var io = IO()
+    private var io = IO(listOf(ConsolePort(System.`in`, System.out)))
 
     fun executeSingle(): Boolean {
         ir = memory[iar++]

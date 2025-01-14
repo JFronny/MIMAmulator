@@ -1,5 +1,6 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima
 
+import de.frohnmeyerwds.mima.util.*
 import java.io.Reader
 import java.io.StringReader
 

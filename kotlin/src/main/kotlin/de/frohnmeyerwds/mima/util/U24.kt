@@ -1,4 +1,4 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima.util
 
 class U24(value: Int) {
     val value = value and 0xFFFFFF
@@ -50,3 +50,5 @@ class U24(value: Int) {
 
 fun UByte.toU24(): U24 = U24(this.toInt())
 fun Int.toU24(): U24 = U24(this)
+
+val ZERO = U24(0)

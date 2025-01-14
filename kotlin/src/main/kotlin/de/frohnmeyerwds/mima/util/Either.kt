@@ -1,4 +1,4 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima.util
 
 sealed interface Either<L, R> {
     data class Left<L, R>(val value: L) : Either<L, R>

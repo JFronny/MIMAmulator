@@ -1,5 +1,8 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima
 
+import de.frohnmeyerwds.mima.util.DyBuf
+import de.frohnmeyerwds.mima.util.U24
+import de.frohnmeyerwds.mima.util.toU24
 import java.io.Writer
 
 fun disassemble(dyBuf: DyBuf, writer: Writer) {

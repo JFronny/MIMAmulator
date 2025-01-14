@@ -1,5 +1,7 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima
 
+import de.frohnmeyerwds.mima.util.DyBuf
+import de.frohnmeyerwds.mima.util.U24
 import kotlin.io.path.Path
 import kotlin.io.path.readBytes
 import kotlin.io.path.reader

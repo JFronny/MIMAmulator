@@ -1,4 +1,4 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima.util
 
 import kotlin.math.max
 import kotlin.math.min

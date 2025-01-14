@@ -1,4 +1,4 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima.util
 
 class U24Array constructor(val value: IntArray) {
     constructor(size: Int) : this(IntArray(size))
