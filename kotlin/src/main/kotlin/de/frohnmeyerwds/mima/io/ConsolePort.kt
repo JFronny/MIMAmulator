@@ -13,6 +13,7 @@ class ConsolePort(private val `in`: InputStream, private val out: OutputStream) 
     override fun write(value: U24) {
         if (value.value and 0xFFFF80 == 0) out.write(value.value)
         else value.value.toChar().toString().byteInputStream(Charsets.UTF_8).use { it.copyTo(out) }
+        out.flush()
     }
 
     override val kind: U24 get() = U24(3)

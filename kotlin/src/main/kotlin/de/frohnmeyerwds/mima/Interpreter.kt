@@ -49,6 +49,13 @@ class Mima(val memory: DyBuf, ports: List<Port>, start: U24) {
 
     fun interpret() {
         while (executeSingle()) { }
+//        val count = 100000
+//        val start = System.nanoTime()
+//        for (i in 0..count) {
+//            if (!executeSingle()) break
+//        }
+//        val end = System.nanoTime()
+//        println("${count.toFloat() * 1000000000 / (end - start)}Hz")
     }
 
     override fun toString(): String = buildString {

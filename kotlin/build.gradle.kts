@@ -34,4 +34,7 @@ graalvmNative {
             sharedLibrary = false
         }
     }
+    agent {
+        defaultMode = "standard"
+    }
 }

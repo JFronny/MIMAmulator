@@ -55,10 +55,11 @@ fun main(args: Array<String>) {
                 return
             }
 
-            val start = if (args.size == 2 || args[2].startsWith("-")) U24(0) else U24.parse(args[2])
+            val arg2 = args.size > 2 && args[2].startsWith('-')
+            val start = if (args.size == 2 || arg2) U24(0) else U24.parse(args[2])
             val ports = mutableListOf<Port>()
             var disassemble = false
-            for (i in 3..<args.size) {
+            for (i in (if (arg2) 2 else 3)..<args.size) {
                 if (args[i] == "-d") {
                     disassemble = true
                     continue

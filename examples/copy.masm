@@ -1,0 +1,17 @@
+JMP _start
+consoleText DS "- <> Music Playback <> -\n"
+
+; ffmpeg -i source.mp3 -f s24be -acodec pcm_s24be -ac 1 -ar 16000 source.pcm
+; mima-kotlin interpret examples/copy.mbf --port.console --port.ro=source.pcm --port.sound
+
+console = 1
+source = 2
+target = 3
+
+_start:
+    LDC consoleText
+    OUTS console
+_datum:
+    IN source
+    OUT target
+    JMP _datum
