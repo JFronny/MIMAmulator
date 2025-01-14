@@ -97,6 +97,7 @@ fun main(args: Array<String>) {
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
             Mima(dyBuf, ports, start).interpret()
+            ports.forEach { it.close() }
             if (disassemble) {
                 println("Last state was:")
                 disassemble(dyBuf, System.out.writer())
