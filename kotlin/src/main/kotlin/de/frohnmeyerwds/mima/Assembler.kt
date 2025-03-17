@@ -4,10 +4,15 @@ import de.frohnmeyerwds.mima.util.*
 import java.io.Reader
 import java.io.StringReader
 
+fun interface Cmd {
+    operator fun invoke(a: U24?, pos: U24): U24
+}
+fun interface PaCmd : Cmd
+
 fun assemble(reader: Reader, start: U24 = U24(0), knownConstants: Map<String, U24> = mapOf()): DyBuf {
     val dyBuf = DyBuf()
 
-    fun vcmd(opcode: UByte): (U24?, U24) -> U24 = { a, pos ->
+    fun vcmd(opcode: UByte): Cmd = Cmd { a, pos ->
         dyBuf[pos] = (opcode.toU24() shl 20) or (a ?: error("Missing argument"))
         pos + 1
     }
@@ -17,15 +22,16 @@ fun assemble(reader: Reader, start: U24 = U24(0), knownConstants: Map<String, U2
         pos + 1
     }
 
-    fun bacmd(opcode: UByte): (U24?, U24) -> U24 = { a, pos ->
+    fun bacmd(opcode: UByte): Cmd = Cmd { a, pos ->
         dyBuf[pos] = (opcode.toU24() shl 16) or (a ?: error("Missing argument"))
         pos + 1
     }
 
-    fun pacmd(code: String): (U24?, U24) -> U24 = { a, pos ->
+    fun pacmd(code: String): Cmd = PaCmd { a, pos ->
         // Warning: If a pseudo-instruction uses a different pseudo-instruction in its implementation,
         //          the parameters MUST be available BEFORE that pseudo-instruction is called.
         //          Make sure you use no down-jumps or data stores defined later in the code!
+        //          This should be cought by the PaCmd check below, but its best you just make sure
         val buf = assemble(StringReader(code), pos, mapOf(
             "a1" to (a ?: error("Missing argument"))
         ))
@@ -188,7 +194,8 @@ fun assemble(reader: Reader, start: U24 = U24(0), knownConstants: Map<String, U2
         if (word in codes1) {
             val next = readWord()
             labels.forEach { constants[it] = pos }
-            pos = codes1[word]!!(next?.let { readU24(pos, it) }, pos)
+            val code = codes1[word]!!
+            pos = code(next?.let { readU24(if (code is PaCmd) null else pos, it) }, pos)
             continue
         }
         val next = readWord()
