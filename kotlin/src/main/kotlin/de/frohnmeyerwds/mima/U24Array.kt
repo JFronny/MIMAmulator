@@ -24,9 +24,13 @@ class U24Array constructor(val value: IntArray) {
 
     val size get() = value.size
 
-    fun copyInto(target: U24Array) {
-        value.copyInto(target.value)
+    fun copyInto(target: U24Array, destinationIndex: Int = 0, startIndex: Int = 0, endIndex: Int = size) {
+        value.copyInto(target.value, destinationIndex, startIndex, endIndex)
     }
 
     fun copyOf(size: Int) = U24Array(value.copyOf(size))
+
+    override fun toString(): String {
+        return value.joinToString(prefix = "[", postfix = "]") { U24.toString(it) }
+    }
 }

@@ -19,6 +19,11 @@ class DyBuf {
         buffer[index] = value
     }
     operator fun set(index: U24, value: U24) = set(index.value, value)
+    operator fun set(index: Int, value: DyBuf) {
+        grow(index + value.size)
+        value.buffer.copyInto(buffer, index)
+    }
+    operator fun set(index: U24, value: DyBuf) = set(index.value, value)
     operator fun get(index: Int): U24 = buffer[index]
     operator fun get(index: U24) = get(index.value)
 
@@ -34,9 +39,9 @@ class DyBuf {
         val start = size
         grow(size + value.size / 3)
         for (i in 0 until value.size / 3) {
-            buffer[start + i] = U24((value[i * 3].toInt() and 0xFF shl 16) or
-                    (value[i * 3 + 1].toInt() and 0xFF shl 8) or
-                    (value[i * 3 + 2].toInt() and 0xFF))
+            buffer[start + i] = U24((value[i * 3].toUByte().toInt() shl 16) or
+                    (value[i * 3 + 1].toUByte().toInt() shl 8) or
+                    (value[i * 3 + 2].toUByte().toInt()))
         }
     }
 
@@ -60,6 +65,25 @@ class DyBuf {
     fun forEachIndexed(function: (Int, U24) -> Unit) {
         for (i in 0 until size) {
             function(i, buffer[i])
+        }
+    }
+
+    fun copyOfRange(from: Int, to: Int): DyBuf {
+        if (from < 0 || to > size || from > to) {
+            throw IndexOutOfBoundsException("Invalid range: $from..$to")
+        }
+        val result = DyBuf()
+        result.grow(to - from)
+        for (i in from until to) {
+            result.buffer[i - from] = buffer[i]
+        }
+        return result
+    }
+
+    override fun toString(): String = buildString {
+        this@DyBuf.forEachIndexed { index, value ->
+            if (index > 0) append(" ")
+            append(value.toStringFlat())
         }
     }
 }
