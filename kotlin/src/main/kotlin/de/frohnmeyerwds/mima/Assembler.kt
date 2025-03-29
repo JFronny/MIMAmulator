@@ -128,22 +128,6 @@ fun assemble(reader: Reader, start: U24 = ZERO, knownConstants: Map<String, U24>
         if (i.toChar() == '\n') line++
     }
 
-    fun readChar(ch: Char, next: () -> Char?): Char? {
-        return when (ch) {
-            '\\' -> when (next()) {
-                'n' -> '\n'
-                'r' -> '\r'
-                't' -> '\t'
-                '0' -> '\u0000'
-                null -> error("Unexpected escape sequence \"\\ \" in line $line")
-                else -> error("Unknown escape sequence \"\\$ch\" in line $line")
-            }
-            '\"' -> null
-            '\n' -> error("Unexpected end of line in line $line")
-            else -> ch
-        }
-    }
-
     fun readU24(pos: U24?, word: String = readWord() ?: error("Unexpected end of file")): U24 {
         if (word.getOrNull(0) == '\'') {
             if (word.length !in 3..4 || word.last() != '\'') error("Invalid character: $word")
