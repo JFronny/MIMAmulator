@@ -1,16 +1,25 @@
 package de.frohnmeyerwds.mima.util
 
+import kotlin.math.max
+import kotlin.math.min
+
 class DyBuf {
+    private val maxSize = 0x100000
+
     private var buffer = U24Array(0)
-    private var size = 0
+    var size = 0
+        private set
 
     private fun grow(newSize: Int) {
-        if (newSize <= buffer.size) {
+        if (newSize <= size) {
             return
         }
-        val newBuffer = U24Array(newSize)
-        buffer.copyInto(newBuffer)
-        buffer = newBuffer
+        if (newSize > maxSize) throw IndexOutOfBoundsException("Buffer overflow")
+        if (newSize > buffer.size) {
+            val newBuffer = U24Array(min(maxSize, max(buffer.size * 2, newSize)))
+            buffer.copyInto(newBuffer)
+            buffer = newBuffer
+        }
         size = newSize
     }
 
@@ -24,7 +33,10 @@ class DyBuf {
         value.buffer.copyInto(buffer, index)
     }
     operator fun set(index: U24, value: DyBuf) = set(index.value, value)
-    operator fun get(index: Int): U24 = buffer[index]
+    operator fun get(index: Int): U24 {
+        grow(index + 1)
+        return buffer[index]
+    }
     operator fun get(index: U24) = get(index.value)
 
     operator fun plusAssign(value: U24) {

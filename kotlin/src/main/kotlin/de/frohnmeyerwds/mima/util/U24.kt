@@ -1,6 +1,6 @@
 package de.frohnmeyerwds.mima.util
 
-class U24 constructor(value: Int) : Comparable<U24> {
+class U24(value: Int) : Comparable<U24> {
     val value = value and 0xFFFFFF
 
     override fun toString(): String = toString(value)
