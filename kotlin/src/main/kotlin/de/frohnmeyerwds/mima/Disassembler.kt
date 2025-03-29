@@ -36,6 +36,7 @@ fun disassemble(dyBuf: DyBuf, writer: Writer) {
     constants.forEach { (pos, name) ->
         writer.appendLine("$name = ${pos.value}")
     }
+    writer.flush()
 }
 
 private fun disassemble(position: U24, command: U24, constants: MutableMap<U24, String>): String {

@@ -6,18 +6,29 @@ import de.frohnmeyerwds.mima.util.ZERO
 import de.frohnmeyerwds.mima.util.toU24
 import java.io.Reader
 
-fun assemble(reader: Reader): DyBuf {
+fun interface Cmd {
+    operator fun invoke(arg: U24?, pos: U24): U24
+}
+
+fun assemble(reader: Reader, start: U24 = ZERO, knownConstants: Map<String, U24> = mapOf()): DyBuf {
     val dyBuf = DyBuf()
 
-    fun vcmd(opcode: UByte): (U24?, U24) -> Unit = { a, pos ->
+    fun vcmd(opcode: UByte): Cmd = Cmd { a, pos ->
         dyBuf[pos] = (opcode.toU24() shl 20) or (a ?: error("Missing argument"))
+        pos + 1
     }
 
-    fun bcmd(opcode: UByte): (U24) -> Unit = { pos ->
+    fun bcmd(opcode: UByte): (U24) -> U24 = { pos ->
         dyBuf[pos] = (opcode.toU24() shl 16)
+        pos + 1
     }
 
-    val codes = mapOf(
+    val codes0 = mapOf(
+        "HALT" to bcmd(0xF0.toUByte()),
+        "NOT"  to bcmd(0xF1.toUByte()),
+        "RAR"  to bcmd(0xF2.toUByte()),
+    )
+    val codes1 = mapOf(
         "LDC"  to vcmd(   0.toUByte()),
         "LDV"  to vcmd(   1.toUByte()),
         "STV"  to vcmd(   2.toUByte()),
@@ -29,13 +40,8 @@ fun assemble(reader: Reader): DyBuf {
         "JMP"  to vcmd(   8.toUByte()),
         "JMN"  to vcmd(   9.toUByte()),
     )
-    val codes2 = mapOf(
-        "HALT" to bcmd(0xF0.toUByte()),
-        "NOT"  to bcmd(0xF1.toUByte()),
-        "RAR"  to bcmd(0xF2.toUByte()),
-    )
 
-    val constants = mutableMapOf<String, U24>()
+    val constants = knownConstants.toMutableMap()
     val orConstants = mutableMapOf<String, MutableSet<U24>>()
     var line = 1
 
@@ -64,14 +70,37 @@ fun assemble(reader: Reader): DyBuf {
         if (i.toChar() == '\n') line++
     }
 
+    fun readChar(ch: Char, next: () -> Char?): Char? {
+        return when (ch) {
+            '\\' -> when (next()) {
+                'n' -> '\n'
+                'r' -> '\r'
+                't' -> '\t'
+                '0' -> '\u0000'
+                null -> error("Unexpected escape sequence \"\\ \" in line $line")
+                else -> error("Unknown escape sequence \"\\$ch\" in line $line")
+            }
+            '\"' -> null
+            '\n' -> error("Unexpected end of line in line $line")
+            else -> ch
+        }
+    }
+
     fun readU24(pos: U24?, word: String = readWord() ?: error("Unexpected end of file")): U24 {
+        if (word.getOrNull(0) == '\'') {
+            if (word.length !in 3..4 || word.last() != '\'') error("Invalid character: $word")
+            var i = 1
+            val ch = readChar(word[i++]) { word.getOrNull(i++) }?.code ?: error("Invalid character: $word")
+            if (i != word.length - 1) error("Invalid character: $word")
+            return U24(ch)
+        }
         return U24.tryParse(word) ?: constants[word] ?: run {
             orConstants.computeIfAbsent(word) { mutableSetOf() }.add(pos ?: error("Invalid constant: $word"))
             ZERO
         }
     }
 
-    var pos = ZERO
+    var pos = start
     while (true) {
         var word = readWord() ?: break
         val labels = mutableListOf<String>()
@@ -79,19 +108,16 @@ fun assemble(reader: Reader): DyBuf {
             labels.add(word.dropLast(1))
             word = readWord() ?: error("Unexpected end of file")
         }
-        if (word in codes) {
-            val code = codes[word]!!
-            val next = readWord()
-            code(next?.let { readU24(pos, it) }, pos)
+        if (word in codes0) {
             labels.forEach { constants[it] = pos }
-            pos++
+            pos = codes0[word]!!(pos)
             continue
         }
-        if (word in codes2) {
-            val code = codes2[word]!!
-            code(pos)
+        if (word in codes1) {
+            val next = readWord()
             labels.forEach { constants[it] = pos }
-            pos++
+            val code = codes1[word]!!
+            pos = code(next?.let { readU24(pos, it) }, pos)
             continue
         }
         val next = readWord()
