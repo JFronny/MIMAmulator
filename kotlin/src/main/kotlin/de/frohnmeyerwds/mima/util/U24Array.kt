@@ -1,6 +1,6 @@
 package de.frohnmeyerwds.mima.util
 
-class U24Array constructor(val value: IntArray) {
+class U24Array(private val value: IntArray) {
     constructor(size: Int) : this(IntArray(size))
     constructor(size: U24) : this(size.value)
 
