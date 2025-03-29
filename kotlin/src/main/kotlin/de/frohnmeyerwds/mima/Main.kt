@@ -1,5 +1,6 @@
 package de.frohnmeyerwds.mima
 
+import de.frohnmeyerwds.mima.util.U24
 import kotlin.io.path.Path
 
 fun main(args: Array<String>) {

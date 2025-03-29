@@ -1,5 +1,8 @@
 package de.frohnmeyerwds.mima
 
+import de.frohnmeyerwds.mima.util.DyBuf
+import de.frohnmeyerwds.mima.util.U24
+import de.frohnmeyerwds.mima.util.toU24
 import java.nio.file.Path
 import kotlin.io.path.readBytes
 

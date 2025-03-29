@@ -1,4 +1,4 @@
-package de.frohnmeyerwds.mima
+package de.frohnmeyerwds.mima.util
 
 class U24 constructor(value: Int) : Comparable<U24> {
     val value = value and 0xFFFFFF
