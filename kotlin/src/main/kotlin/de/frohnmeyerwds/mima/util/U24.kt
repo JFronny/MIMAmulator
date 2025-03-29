@@ -1,13 +1,13 @@
 package de.frohnmeyerwds.mima.util
 
-class U24(value: Int) {
+class U24(value: Int) : Comparable<U24> {
     val value = value and 0xFFFFFF
 
     override fun toString(): String = toString(value)
     fun toStringFlat(): String = toStringFlat(value)
 
-    operator fun compareTo(other: Int): Int = value.compareTo(other)
-    operator fun compareTo(other: U24): Int = toInt().compareTo(other.toInt())
+    operator fun compareTo(other: Int): Int = toInt().compareTo(other)
+    override operator fun compareTo(other: U24): Int = toInt().compareTo(other.toInt())
 
     fun toInt() = if (value and 0x800000 != 0) value or 0xFF000000.toInt() else value
     fun toUInt(): UInt = value.toUInt()
@@ -26,14 +26,15 @@ class U24(value: Int) {
     operator fun dec(): U24 = U24(value - 1)
     operator fun plus(i: Int): U24 = U24(value + i)
     operator fun plus(i: U24): U24 = U24(value + i.value)
-    operator fun minus(i: Int): String = U24(value - i).toString()
+    operator fun minus(i: Int): U24 = U24(value - i)
+    operator fun minus(i: U24): U24 = U24(value - i.value)
 
     companion object {
         fun parse(value: String): U24 {
             val i = if (value.startsWith("0x")) value.substring(2).toInt(16)
                     else value.toInt()
             val res = U24(i)
-            if (i != res.toInt()) throw NumberFormatException("Number out of representable range: $value")
+            if (i != res.toInt()) throw NumberFormatException("Number out of representation range: $value")
             return res
         }
 
