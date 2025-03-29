@@ -51,7 +51,7 @@ fun main(args: Array<String>) {
                 println("Usage: Assembler interpret <file> [start] [options]")
                 println("       start: start address in hex (default: 0)")
                 println("Options:")
-                println("   -d: disassemble memory after execution")
+                println("       -d: disassemble memory after execution")
                 return
             }
 
@@ -90,10 +90,12 @@ fun main(args: Array<String>) {
                         }
                     }
                 } else {
+                    println("Unknown option: ${args[i]}")
                     help()
                     return
                 }
             }
+
             if (ports.isEmpty()) ports.add(ConsolePort())
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
@@ -103,7 +105,6 @@ fun main(args: Array<String>) {
                 println("Last state was:")
                 disassemble(dyBuf, System.out.writer())
             }
-
         }
 
         "performance" -> {

@@ -4,12 +4,13 @@ import de.frohnmeyerwds.mima.io.IO
 import de.frohnmeyerwds.mima.io.Port
 import de.frohnmeyerwds.mima.util.DyBuf
 import de.frohnmeyerwds.mima.util.U24
+import de.frohnmeyerwds.mima.util.ZERO
 import de.frohnmeyerwds.mima.util.toU24
 
 class Mima(val memory: DyBuf, ports: List<Port>, start: U24) {
     private var iar = start
-    private var ir: U24 = U24(0)
-    private var akku = U24(0)
+    private var ir: U24 = ZERO
+    private var akku = ZERO
     private var io = IO(ports)
 
     fun executeSingle(): Boolean {
@@ -22,12 +23,12 @@ class Mima(val memory: DyBuf, ports: List<Port>, start: U24) {
             0x4 -> akku = akku and memory[arg(ir)]
             0x5 -> akku = akku or memory[arg(ir)]
             0x6 -> akku = akku xor memory[arg(ir)]
-            0x7 -> akku = if (akku == memory[arg(ir)]) U24(-1) else U24(0)
+            0x7 -> akku = if (akku == memory[arg(ir)]) U24(-1) else ZERO
             0x8 -> iar = arg(ir)
-            0x9 -> if (akku < U24(0)) iar = arg(ir)
+            0x9 -> if (akku < ZERO) iar = arg(ir)
             0xF -> when (ir.value and 0xF0000 shr 16) {
                 0x0 -> {
-                    println("HALT at ${iar - 1}")
+                    println("HALT at address ${iar - 1}")
                     return false
                 }
                 0x1 -> akku = akku.inv()

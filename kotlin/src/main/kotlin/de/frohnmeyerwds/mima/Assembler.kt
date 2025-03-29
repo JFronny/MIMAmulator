@@ -9,7 +9,7 @@ fun interface Cmd {
 }
 fun interface PaCmd : Cmd
 
-fun assemble(reader: Reader, start: U24 = U24(0), knownConstants: Map<String, U24> = mapOf()): DyBuf {
+fun assemble(reader: Reader, start: U24 = ZERO, knownConstants: Map<String, U24> = mapOf()): DyBuf {
     val dyBuf = DyBuf()
 
     fun vcmd(opcode: UByte): Cmd = Cmd { a, pos ->
@@ -154,7 +154,7 @@ fun assemble(reader: Reader, start: U24 = U24(0), knownConstants: Map<String, U2
         }
         return U24.tryParse(word) ?: constants[word] ?: run {
             orConstants.computeIfAbsent(word) { mutableSetOf() }.add(pos ?: error("Invalid constant: $word"))
-            U24(0)
+            ZERO
         }
     }
 
