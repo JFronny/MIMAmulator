@@ -5,7 +5,7 @@ import java.io.Reader
 import java.io.StringReader
 
 fun interface Cmd {
-    operator fun invoke(a: U24?, pos: U24): U24
+    operator fun invoke(arg: U24?, pos: U24): U24
 }
 fun interface PaCmd : Cmd
 
