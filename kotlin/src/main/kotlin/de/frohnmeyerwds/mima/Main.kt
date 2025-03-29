@@ -5,6 +5,7 @@ import de.frohnmeyerwds.mima.io.Port
 import de.frohnmeyerwds.mima.io.ReadOnlyPort
 import de.frohnmeyerwds.mima.util.DyBuf
 import de.frohnmeyerwds.mima.util.U24
+import de.frohnmeyerwds.mima.util.ZERO
 import java.io.RandomAccessFile
 import kotlin.io.path.*
 
@@ -54,7 +55,7 @@ fun main(args: Array<String>) {
                 return
             }
 
-            val start = if (args.size == 2 || args[2].startsWith("-")) U24(0) else U24.parse(args[2])
+            val start = if (args.size == 2 || args[2].startsWith("-")) ZERO else U24.parse(args[2])
             val ports = mutableListOf<Port>()
             var disassemble = false
             for (i in 3..<args.size) {
@@ -118,9 +119,9 @@ fun main(args: Array<String>) {
             val iterationCount = args[2].toInt()
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
-            val mima = Mima(dyBuf, listOf(ConsolePort()), U24(0))
+            val mima = Mima(dyBuf, listOf(ConsolePort()), ZERO)
             val start = System.nanoTime()
-            for (i in 0..<iterationCount) {
+            for (i in 0 ..< iterationCount) {
                 if (!mima.executeSingle()) {
                     println("Execution stopped prematurely after $i instructions, cancelling performance test")
                     return
