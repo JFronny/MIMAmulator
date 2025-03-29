@@ -1,4 +1,4 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima
 
 class U24 constructor(value: Int) {
     val value = value and 0xFFFFFF

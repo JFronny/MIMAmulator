@@ -1,4 +1,4 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima
 
 class DyBuf {
     private var buffer = U24Array(0)

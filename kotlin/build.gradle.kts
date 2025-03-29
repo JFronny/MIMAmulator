@@ -18,5 +18,5 @@ tasks.test {
 }
 
 application {
-    mainClass = "de.frohnmeyer_wds.MainKt"
+    mainClass = "de.frohnmeyerwds.mima.MainKt"
 }

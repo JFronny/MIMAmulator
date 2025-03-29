@@ -1,4 +1,4 @@
-package de.frohnmeyer_wds
+package de.frohnmeyerwds.mima
 
 import java.nio.file.Path
 import kotlin.io.path.readBytes
