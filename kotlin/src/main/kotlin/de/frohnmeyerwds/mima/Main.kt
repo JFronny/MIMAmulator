@@ -34,6 +34,7 @@ fun main(args: Array<String>) {
             }
             Path(args[2]).writeBytes(Path(args[1]).reader().use { assemble(it) }.toByteArray())
         }
+
         "disassemble" -> {
             if (args.size != 2) {
                 println("Usage: Assembler disassemble <file>")
@@ -43,20 +44,36 @@ fun main(args: Array<String>) {
             dyBuf += Path(args[1]).readBytes()
             disassemble(dyBuf, System.out.writer())
         }
+
         "interpret" -> {
-            if (args.size !in 2..3) {
-                println("Usage: Assembler interpret <file> [start]")
+            fun help() {
+                println("Usage: Assembler interpret <file> [start] [options]")
                 println("       start: start address in hex (default: 0)")
-                return
+                println("Options:")
+                println("       -d: disassemble memory after execution")
             }
-            if (args.size == 2) {
-                main(arrayOf(args[0], args[1], "0"))
-                return
+
+            val start = if (args.size == 2 || args[2].startsWith("-")) ZERO else U24.parse(args[2])
+            var disassemble = false
+            for (i in 3..<args.size) {
+                if (args[i] == "-d") {
+                    disassemble = true
+                } else {
+                    println("Unknown option: ${args[i]}")
+                    help()
+                    return
+                }
             }
+
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
-            interpret(dyBuf, U24.parse(args[2]))
+            Mima(dyBuf, start).interpret()
+            if (disassemble) {
+                println("Last state was:")
+                disassemble(dyBuf, System.out.writer())
+            }
         }
+
         "performance" -> {
             if (args.size !in 2..3) {
                 println("Usage: Assembler performance <file> [iterations]")
@@ -82,6 +99,7 @@ fun main(args: Array<String>) {
             disassemble(dyBuf, System.out.writer())
             println("Took ${(end - start) / 1000000}ms for $iterationCount instructions at ${iterationCount.toDouble() / (end - start) * 1000} MHz")
         }
+
         else -> println("Unknown command: ${args[0]}")
     }
 }
