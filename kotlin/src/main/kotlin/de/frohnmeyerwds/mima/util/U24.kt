@@ -53,3 +53,4 @@ fun UByte.toU24(): U24 = U24(this.toInt())
 fun Int.toU24(): U24 = U24(this)
 
 val ZERO = U24(0)
+val ONE = U24(1)

@@ -1,5 +1,6 @@
 package de.frohnmeyerwds.mima
 
+import de.frohnmeyerwds.mima.extension.EXTENSIONS
 import de.frohnmeyerwds.mima.io.ConsolePort
 import de.frohnmeyerwds.mima.io.Port
 import de.frohnmeyerwds.mima.io.ReadOnlyPort
@@ -33,7 +34,8 @@ fun main(args: Array<String>) {
                 main(arrayOf(args[0], args[1], args[1].removeSuffix(".masm") + ".mbf"))
                 return
             }
-            Path(args[2]).writeBytes(Path(args[1]).reader().use { assemble(it) }.toByteArray())
+            //TODO make extensions configurable
+            Path(args[2]).writeBytes(Path(args[1]).reader().use { assemble(it, EXTENSIONS.values.toSet()) }.toByteArray())
         }
 
         "disassemble" -> {
@@ -43,7 +45,8 @@ fun main(args: Array<String>) {
             }
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
-            disassemble(dyBuf, System.out.writer())
+            //TODO make extensions configurable
+            disassemble(dyBuf, EXTENSIONS.values.toSet(), System.out.writer())
         }
 
         "interpret" -> {
@@ -95,15 +98,16 @@ fun main(args: Array<String>) {
                     return
                 }
             }
+            val extensions = EXTENSIONS.values.toSet() //TODO make extensions configurable
 
             if (ports.isEmpty()) ports.add(ConsolePort())
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
-            Mima(dyBuf, ports, start).interpret()
+            Mima(dyBuf, extensions, ports, start).interpret()
             ports.forEach { it.close() }
             if (disassemble) {
                 println("Last state was:")
-                disassemble(dyBuf, System.out.writer())
+                disassemble(dyBuf, extensions, System.out.writer())
             }
         }
 
@@ -117,10 +121,11 @@ fun main(args: Array<String>) {
                 main(arrayOf(args[0], args[1], "50000"))
                 return
             }
+            val extensions = EXTENSIONS.values.toSet() //TODO make extensions configurable
             val iterationCount = args[2].toInt()
             val dyBuf = DyBuf()
             dyBuf += Path(args[1]).readBytes()
-            val mima = Mima(dyBuf, listOf(ConsolePort()), ZERO)
+            val mima = Mima(dyBuf, extensions, listOf(ConsolePort()), ZERO)
             val start = System.nanoTime()
             for (i in 0 ..< iterationCount) {
                 if (!mima.executeSingle()) {
@@ -129,7 +134,7 @@ fun main(args: Array<String>) {
                 }
             }
             val end = System.nanoTime()
-            disassemble(dyBuf, System.out.writer())
+            disassemble(dyBuf, extensions, System.out.writer())
             println("Took ${(end - start) / 1000000}ms for $iterationCount instructions at ${iterationCount.toDouble() / (end - start) * 1000} MHz")
         }
 

@@ -1,182 +1,46 @@
 package de.frohnmeyerwds.mima
 
+import de.frohnmeyerwds.mima.extension.Extension
+import de.frohnmeyerwds.mima.extension.InsertContext
 import de.frohnmeyerwds.mima.util.*
 import java.io.Reader
-import java.io.StringReader
 
-fun interface Cmd {
-    operator fun invoke(arg: U24?, pos: U24): U24
+private fun interface Code0 {
+    operator fun invoke(pos: U24): U24
 }
-fun interface PaCmd : Cmd
 
-fun assemble(reader: Reader, start: U24 = ZERO, knownConstants: Map<String, U24> = mapOf()): DyBuf {
+private fun interface Code1 {
+    operator fun invoke(arg: U24, pos: U24): U24
+}
+
+class DSCode1(private val dyBuf: DyBuf) : Code1 {
+    override fun invoke(arg: U24, pos: U24): U24 {
+        dyBuf[pos] = arg
+        return ONE
+    }
+}
+
+private data class Rewrite1(
+    val at: U24,
+    val size: U24,
+    val line: Int,
+    val arg: String,
+    val insn: Code1,
+)
+
+fun assemble(reader: Reader, extensions: Set<Extension>, start: U24 = ZERO, knownConstants: Map<String, U24> = mapOf()): DyBuf = ReaderScope(reader, knownConstants.toMutableMap()).run {
     val dyBuf = DyBuf()
 
-    fun vcmd(opcode: UByte): Cmd = Cmd { a, pos ->
-        dyBuf[pos] = (opcode.toU24() shl 20) or (a ?: error("Missing argument"))
-        pos + 1
-    }
+    val codes0 = extensions.flatMap { e ->
+        val deps = e.dependencies.map { n -> extensions.first { it.name == n } }.toSet() + e
+        e.instructions0.map { (n, i) -> i.run { n to Code0 { pos -> InsertContext(dyBuf, pos, deps).insert() } } }
+    }.toMap()
+    val codes1 = extensions.flatMap { e ->
+        val deps = e.dependencies.map { n -> extensions.first { it.name == n } }.toSet() + e
+        e.instructions1.map { (n, i) -> i.run { n to Code1 { arg, pos -> InsertContext(dyBuf, pos, deps).insert(arg) } } }
+    }.toMap()
 
-    fun bcmd(opcode: UByte): (U24) -> U24 = { pos ->
-        dyBuf[pos] = (opcode.toU24() shl 16)
-        pos + 1
-    }
-
-    fun bacmd(opcode: UByte): Cmd = Cmd { a, pos ->
-        dyBuf[pos] = (opcode.toU24() shl 16) or (a ?: error("Missing argument"))
-        pos + 1
-    }
-
-    fun pacmd(code: String): Cmd = PaCmd { a, pos ->
-        // Warning: If a pseudo-instruction uses a different pseudo-instruction in its implementation,
-        //          the parameters MUST be available BEFORE that pseudo-instruction is called.
-        //          Make sure you use no down-jumps or data stores defined later in the code!
-        //          This should be cought by the PaCmd check below, but its best you just make sure
-        val buf = assemble(StringReader(code), pos, mapOf(
-            "a1" to (a ?: error("Missing argument"))
-        ))
-        dyBuf[pos] = buf.copyOfRange(pos.value, buf.size)
-        pos + (buf.size - pos.value)
-    }
-
-    val codes0 = mapOf(
-        "HALT" to bcmd(0xF0.toUByte()),
-        "NOT"  to bcmd(0xF1.toUByte()),
-        "RAR"  to bcmd(0xF2.toUByte()),
-    )
-    val codes1 = mapOf(
-        "LDC" to vcmd(0x0.toUByte()),
-        "LDV" to vcmd(0x1.toUByte()),
-        "STV" to vcmd(0x2.toUByte()),
-        "ADD" to vcmd(0x3.toUByte()),
-        "AND" to vcmd(0x4.toUByte()),
-        "OR"  to vcmd(0x5.toUByte()),
-        "XOR" to vcmd(0x6.toUByte()),
-        "EQL" to vcmd(0x7.toUByte()),
-        "JMP" to vcmd(0x8.toUByte()),
-        "JMN" to vcmd(0x9.toUByte()),
-
-        "IN"  to bacmd(0xF3.toUByte()),
-        "OUT" to bacmd(0xF4.toUByte()),
-
-        "LDI" to pacmd("""
-            LDV il
-            ADD a1
-            STV cm
-            JMP cm
-        il: LDV 0
-        cm: LDV 0
-        """.trimIndent()),
-
-        "OUTS" to pacmd("""
-            JMP prepare
-            
-        arg DS 0
-        end DS 0
-        pos DS 0
-        
-        prepare:
-            STV arg
-            LDC 1
-            ADD arg
-            STV pos
-            LDI arg
-            ADD pos
-            STV end
-        
-        print:
-            LDV pos
-            EQL end
-            JMN _end
-            LDI pos
-            OUT a1
-            LDC 1
-            ADD pos
-            STV pos
-            JMP print
-        _end:
-            LDV arg
-        """.trimIndent()),
-    )
-
-    val constants = knownConstants.toMutableMap()
-    val orConstants = mutableMapOf<String, MutableSet<U24>>()
-    var line = 1
-
-    fun readWord(): String? = buildString {
-        var i = reader.read()
-
-        fun skipComment(): Boolean = if (i.toChar() != ';') false else run {
-            while (i != -1 && i.toChar() != '\n') {
-                i = reader.read()
-            }
-            if (i.toChar() == '\n') line++
-            true
-        }
-
-        while (i != -1 && i.toChar().isWhitespace()) {
-            if (i.toChar() == '\n') line++
-            i = reader.read()
-        }
-        if (i == -1) return null
-        if (skipComment()) return readWord()
-        while (i != -1 && !i.toChar().isWhitespace()) {
-            if (skipComment()) break
-            append(i.toChar())
-            i = reader.read()
-        }
-        if (i.toChar() == '\n') line++
-    }
-
-    fun readChar(ch: Char, next: () -> Char?): Char? {
-        return when (ch) {
-            '\\' -> when (next()) {
-                'n' -> '\n'
-                'r' -> '\r'
-                't' -> '\t'
-                '0' -> '\u0000'
-                null -> error("Unexpected escape sequence \"\\ \" in line $line")
-                else -> error("Unknown escape sequence \"\\$ch\" in line $line")
-            }
-            '\"' -> null
-            '\n' -> error("Unexpected end of line in line $line")
-            else -> ch
-        }
-    }
-
-    fun readU24(pos: U24?, word: String = readWord() ?: error("Unexpected end of file")): U24 {
-        if (word.getOrNull(0) == '\'') {
-            if (word.length !in 3..4 || word.last() != '\'') error("Invalid character: $word")
-            var i = 1
-            val ch = readChar(word[i++]) { word.getOrNull(i++) }?.code ?: error("Invalid character: $word")
-            if (i != word.length - 1) error("Invalid character: $word")
-            return U24(ch)
-        }
-        return U24.tryParse(word) ?: constants[word] ?: run {
-            orConstants.computeIfAbsent(word) { mutableSetOf() }.add(pos ?: error("Invalid constant: $word"))
-            ZERO
-        }
-    }
-
-    fun readStringOrU24(pos: U24?): Either<U24, String> {
-        val word = readWord() ?: error("Unexpected end of file")
-        return if (word.getOrNull(0) == '\"') {
-            buildString {
-                var i = 1
-                while (i < word.length) {
-                    append(readChar(word[i++]) { word.getOrNull(i++) } ?: return@buildString)
-                }
-                append(' ')
-                i = reader.read()
-                while (i != -1 && i.toChar() != '\"') {
-                    append(readChar(i.toChar()) { i = reader.read(); if (i == -1) null else i.toChar() } ?: return@buildString)
-                    i = reader.read()
-                }
-            }.eitherRight()
-        } else {
-            readU24(pos, word).eitherLeft()
-        }
-    }
+    val rewrite1 = mutableSetOf<Rewrite1>()
 
     var pos = start
     while (true) {
@@ -192,10 +56,13 @@ fun assemble(reader: Reader, start: U24 = ZERO, knownConstants: Map<String, U24>
             continue
         }
         if (word in codes1) {
-            val next = readWord()
+            val next = readWord()!!
             labels.forEach { constants[it] = pos }
             val code = codes1[word]!!
-            pos = code(next?.let { readU24(if (code is PaCmd) null else pos, it) }, pos)
+            val arg = readU24(next)
+            val size = code(arg ?: ZERO, pos)
+            if (arg == null) rewrite1.add(Rewrite1(pos, size, line, next, code))
+            pos += size
             continue
         }
         val next = readWord()
@@ -203,34 +70,41 @@ fun assemble(reader: Reader, start: U24 = ZERO, knownConstants: Map<String, U24>
             "DS" -> {
                 constants[word] = pos
                 labels.forEach { constants[it] = pos }
-                readStringOrU24(pos).fold(
-                    { number ->
-                        dyBuf[pos] = number
-                        pos++
-                    },
-                    { string ->
-                        dyBuf[pos++] = U24(string.length)
-                        string.forEach {
-                            dyBuf[pos++] = U24(it.code)
+                val w = readWord() ?: error("Unexpected end of file")
+                val datum = readStringOrU24(pos, w)
+                if (datum == null) {
+                    // must be a number
+                    rewrite1.add(Rewrite1(pos, ONE, line, w, DSCode1(dyBuf)))
+                    pos++
+                } else {
+                    datum.fold(
+                        { number ->
+                            dyBuf[pos] = number
+                            pos++
+                        },
+                        { string ->
+                            dyBuf[pos++] = U24(string.length)
+                            string.forEach {
+                                dyBuf[pos++] = U24(it.code)
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
             "=" -> {
                 if (labels.isNotEmpty()) error("Unexpected '=' in line $line")
-                if (word == "*") {
-                    pos = readU24(null)
-                } else {
-                    constants[word] = readU24(null)
-                }
+                val datum = readU24() ?: error("Constant not yet defined for $word in line $line (constant definitions must not depend on later definitions)")
+                if (word == "*") pos = datum
+                else constants[word] = datum
             }
             else -> error("Unknown opcode: $word in line $line")
         }
     }
 
-    orConstants.forEach { (k, set) -> set.forEach {
-        dyBuf[it] = dyBuf[it] or (constants[k] ?: error("Unknown constant: $k"))
-    } }
+    for (r in rewrite1) {
+        val arg = readU24(r.arg) ?: error("Unknown constant: ${r.arg} in line ${r.line}")
+        if (r.insn(arg, r.at) != r.size) error("Instruction width changed with rewrite caused by ${r.arg} in line ${r.line}")
+    }
 
     return dyBuf
 }
