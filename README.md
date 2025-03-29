@@ -2,16 +2,12 @@
 
 Suite of tools and emulators for the [KITs](https://kit.edu) MIMA (Minimalmaschine, a 'minimal processor').
 
-## General
-- 24 Bits in a word
-- 20 Address bits
-  - 2^20 = 1048576 words of memory
+## About the MIMA
+- The MIMA is a 24 bit word machine
+- The memory is addressed using 20 bits, so 1MiB of primary memory
+- There is only one Register: Akku
 
-### Registers
-- Akku
-
-## OpCodes
-### Format
+### OpCodes
 The MIMA uses either 4 bits or 8 bits for the OpCode. If the Instruction begins with 0xF the MIMA will interpret the first 8 bits as OpCpde.
 
 | Format 1 |   OpCode | Address or constant |
@@ -22,7 +18,7 @@ The MIMA uses either 4 bits or 8 bits for the OpCode. If the Instruction begins 
 |----------|---------:|---------------------|
 | Bits     | 24 to 16 | 15 to 0             |
 
-### OpCode List
+The underscore in 0x0_ signifies that the second leftmost byte is used as part of the address.
 
 | OpCode | Instruction | Action                           |
 |--------|-------------|----------------------------------|
@@ -65,4 +61,4 @@ Initially supplied by JFronny, this implementation provides an assembler, a disa
 Use `gradle build` to build a jar and `java -jar build/libs/mima-kotlin.jar` to view a help message.
 
 ## The C implementation
-TODO
+Provides a simulation on the microcode level of a MIMA as well as an assembler.

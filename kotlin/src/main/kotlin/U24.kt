@@ -20,7 +20,9 @@ class U24 constructor(value: Int) {
     }
 
     operator fun compareTo(other: U24): Int {
-        return compareTo(other.value)
+        val thisValue = if (value and 0x800000 != 0) value or 0xFF000000.toInt() else value
+        val otherValue = if (other.value and 0x800000 != 0) other.value or 0xFF000000.toInt() else other.value
+        return thisValue.compareTo(otherValue)
     }
 
     fun toUInt(): UInt {
